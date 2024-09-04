@@ -25,9 +25,11 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
+    "http-status-codes": "^2.3.0",
     "nodemon": "^3.1.4",
     "passport": "^0.7.0",
     "prisma": "^5.19.0",
+    "puppeteer": "^23.2.2",
     "ts-node": "^10.9.2"
   }
 }
