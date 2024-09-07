@@ -1,5 +1,5 @@
 {
-  "name": "ITJobHunter4",
+  "name": "it-job-hunter",
   "private": true,
   "scripts": {
     "build": "turbo build",
