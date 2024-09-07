@@ -6,6 +6,7 @@ import passport from "passport";
 import session from "express-session";
 import { SESSION_EXPIRY_DATE, SESSION_SECRET } from "./config";
 import { errorHandler } from "./middlewares/errorHandler";
+import router from "./router";
 
 export default function createApp(): Application {
   const app = express();
@@ -38,6 +39,7 @@ export default function createApp(): Application {
 
   app.use(passport.initialize());
   app.use(passport.session());
+  app.use("/api", router());
 
   app.use(errorHandler);
   return app;
