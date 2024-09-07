@@ -2,7 +2,7 @@
   "name": "@repo/schemas",
   "version": "0.0.0",
   "license": "MIT",
-  "type": "module",
+  "private": true,
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc",
@@ -10,29 +10,28 @@
   },
   "exports": {
     "./jobSchemas": {
-      "types": "./src/jobQuerySchema.ts",
-      "default": "./src/jobQuerySchema.js"
+      "types": "./src/jobSchemas.ts",
+      "default": "./dist/jobSchemas.js",
+      "node": "./dist/jobSchemas.js",
+      "import": "./dist/jobSchemas.js"
     }
   },
-  "compilerOptions": {
-    "rootDir": "./",
-    "baseUrl": "./",
-    "paths": {
-      "@apps/*": [
-        "../../apps/*"
-      ]
-    }
+  "*": {
+    "component": [
+      "dist/component.d.ts"
+    ]
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "eslint": "^8.6.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.5.5"
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^8.10.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.8",
+    "typescript": "latest"
   },
   "include": [
-    "**/*"
+    "**/*",
+    "src/**/*.ts"
   ],
   "dependencies": {
     "zod": "^3.23.8"
