@@ -7,7 +7,7 @@ import { JobQuery } from "@repo/interfaces/job";
 export const validateData = (schema: z.ZodObject<any, any>) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      console.log(req.body);
+      console.log(req.body, "query data");
 
       schema.parse(req.body);
       const result: JobQuery = { ...req.body };
@@ -15,6 +15,7 @@ export const validateData = (schema: z.ZodObject<any, any>) => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
+        console.error(error);
         throw new BadRequestError({
           message: "Invalid data",
           context: error.errors.map((issue: any) => ({

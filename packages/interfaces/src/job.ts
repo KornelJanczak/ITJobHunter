@@ -1,5 +1,5 @@
 export interface JobQuery {
-  query: string;
+  content: string;
   category?:
     | "frontend"
     | "backend"
