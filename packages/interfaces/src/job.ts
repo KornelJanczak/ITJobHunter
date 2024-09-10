@@ -1,3 +1,18 @@
+type TechStack =
+  | "react"
+  | "node"
+  | "html"
+  | "php"
+  | "python"
+  | "java"
+  | "c#"
+  | "ts"
+  | "js"
+  | "c"
+  | "c++"
+  | "ruby"
+  | ".net";
+
 export interface JobQuery {
   content: string;
   category?:
@@ -13,4 +28,5 @@ export interface JobQuery {
   lastUpdated?: number;
   typeOfWorkplace?: "onSite" | "hybrid" | "remote";
   positionLevel?: "junior" | "senior" | "leader" | "manager";
+  techStack?: TechStack[];
 }
