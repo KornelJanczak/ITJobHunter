@@ -9,8 +9,8 @@ export const validateData = (schema: z.ZodObject<any, any>) => {
     try {
       console.log(req.body, "query data");
 
-      schema.parse(req.body);
-      const result: JobQuery = { ...req.body };
+      const result: JobQuery = req.body;
+      schema.parse(result);
       req.jobQuery = result;
       next();
     } catch (error) {
