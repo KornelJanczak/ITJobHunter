@@ -1,16 +1,18 @@
 import { NextFunction, Request, Response } from "express";
-import { z, ZodError } from "zod";
+import { z, ZodError, ZodEffects, ZodObject } from "zod";
 import { StatusCodes } from "http-status-codes";
 import BadRequestError from "../errors/badRequestError";
 import { JobQuery } from "@repo/interfaces/job";
 
-export const validateData = (schema: z.ZodObject<any, any>) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const validateData = (
+  schema: z.ZodObject<any> | ZodEffects<ZodObject<any>>
+) => {
+  return (req: Request, _: Response, next: NextFunction) => {
     try {
       console.log(req.body, "query data");
 
-      const result: JobQuery = req.body;
-      schema.parse(result);
+      const result = schema.parse(req.body);
+
       req.jobQuery = result;
       next();
     } catch (error) {
