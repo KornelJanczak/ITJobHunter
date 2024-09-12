@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const jobQuerySchema = z.object({
-  content: z.string(),
+  content: z.string().optional(),
   category: z
     .enum(["frontend", "backend", "ui/ux", "machineLearning", "cyberSecurity"])
     .optional(),
