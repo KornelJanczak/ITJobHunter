@@ -6,9 +6,13 @@ import stealhPlugin from "puppeteer-extra-plugin-stealth";
 import { Cluster } from "puppeteer-cluster";
 import fs from "fs";
 import { scrapeJustJoinIT } from "./scrapeJustJoinIT";
-import { ScrapeOptions } from "../../../interfaces";
+import { ScrapeOptions } from "../interfaces";
+import { NextFunction } from "express";
 
-export const jobScraperService = async (jobQuery: JobQuery) => {
+export const jobScraperService = async (
+  jobQuery: JobQuery,
+  next: NextFunction
+) => {
   const urls = {
     justJoinIT: "https://justjoin.it/",
     noFluffJobs: "https://nofluffjobs.com/",
@@ -29,6 +33,7 @@ export const jobScraperService = async (jobQuery: JobQuery) => {
     url: urls.justJoinIT,
     browser,
     jobQuery,
+    next,
   };
 
   await scrapeJustJoinIT(scrapeOptions);
