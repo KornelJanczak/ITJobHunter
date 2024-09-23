@@ -1,6 +1,5 @@
 {
   "name": "@repo/interfaces",
-
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc"
@@ -13,6 +12,10 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
+    "@repo/schemas": "workspace:*",
     "typescript": "latest"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
   }
 }
