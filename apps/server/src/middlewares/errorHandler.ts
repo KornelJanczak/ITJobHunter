@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/appError";
 
 export const errorHandler = (
-  err: AppError,
+  err: AppError | Error,
   _: Request,
   res: Response,
   __: NextFunction
@@ -24,6 +24,16 @@ export const errorHandler = (
     }
 
     return res.status(statusCode).send({ errors });
+  }
+
+  if (err instanceof Error) {
+    let statusCode = res.statusCode !== 200 ? res.statusCode : 500;
+    console.error(JSON.stringify(err, null, 2));
+    return res
+      .status(statusCode)
+      .send({
+        errors: [{ message: err.message, statusCode, stack: err.stack }],
+      });
   }
 
   console.error(JSON.stringify(err, null, 2));
