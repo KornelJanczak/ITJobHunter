@@ -5,7 +5,6 @@ import { Page } from "puppeteer";
 
 export interface ScrapeOptions {
   url: string;
-  browser: Browser;
   jobQuery: JobQuery;
   next: NextFunction;
 }
