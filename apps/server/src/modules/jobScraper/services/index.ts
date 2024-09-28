@@ -18,14 +18,14 @@ class JobScraperService {
 
   async scrapeJobs(jobQuery: JobQuery, next: NextFunction) {
     await this.initBrowser();
-    const jobLinks = await this.gatherJobLinks({
+    const jobs = await this.gatherJobs({
       jobQuery,
       next,
       url: urls.justJoinIT,
     });
 
     await this.closeBrowser();
-    return jobLinks;
+    return jobs;
   }
 
   private async initBrowser() {
@@ -42,15 +42,15 @@ class JobScraperService {
     }
   }
 
-  private async gatherJobLinks(scrapeOptions: ScrapeOptions) {
+  private async gatherJobs(scrapeOptions: ScrapeOptions) {
     const { scrapeJustJoinIt } = this.initScrapers();
 
-    const jobLinks = await scrapeJustJoinIt.scrape({
+    const jobs = await scrapeJustJoinIt.scrape({
       ...scrapeOptions,
       url: urls.justJoinIT,
     });
 
-    return jobLinks;
+    return jobs;
   }
 
   private initScrapers(): { scrapeJustJoinIt: ScrapeJustJoinIT } {

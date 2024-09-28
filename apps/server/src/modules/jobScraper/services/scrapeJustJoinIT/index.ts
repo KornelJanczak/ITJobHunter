@@ -1,10 +1,11 @@
 import { Browser } from "puppeteer";
 import { ScrapeOptions } from "../../interfaces";
-import { NextFunction } from "express";
+import e, { NextFunction } from "express";
 import { Page } from "puppeteer";
 import BadRequestError from "../../../../errors/badRequestError";
 import { SearchJobOffers } from "../../interfaces";
 import { autoScroll } from "../../helpers/autoScroll";
+import { Cluster } from "puppeteer-cluster";
 
 export default class ScrapeJustJoinIT {
   private browser: Browser;
@@ -22,15 +23,27 @@ export default class ScrapeJustJoinIT {
 
       await this.openPage(page, path, next);
       await this.searchJobOffers({ page, jobQuery, path, next });
-      const jobLinks = await this.scrollAndCollectLinks(page);
+      const jobs = await this.scrollAndCollectLinks(page);
 
-      console.log(jobLinks, "JobLinks Final");
+      console.log(jobs);
+      await this.browser.close();
 
-      return jobLinks;
-    } catch {}
+      return jobs;
+    } catch (err) {
+      throw new BadRequestError({
+        message: "Failed to scrape JustJoinIT",
+        logging: true,
+        code: 400,
+        context: { error: err },
+      });
+    }
   }
 
-  private async openPage(page: Page, path: string, next: NextFunction) {
+  private async openPage(
+    page: Page,
+    path: string,
+    next: NextFunction
+  ): Promise<void> {
     try {
       await page.goto(path);
       await page.waitForSelector("#cookiescript_injected");
@@ -51,7 +64,7 @@ export default class ScrapeJustJoinIT {
     jobQuery,
     path,
     next,
-  }: SearchJobOffers) {
+  }: SearchJobOffers): Promise<void> {
     const { content, techStack } = jobQuery;
 
     if (techStack) {
@@ -75,7 +88,45 @@ export default class ScrapeJustJoinIT {
     }
   }
 
-  private async collectJobLinks(page: Page) {
+  private async collectData(page: Page) {
+    const elements = await page.$$(".MuiBox-root.css-ai36e1");
+
+    const jobOffers = [];
+
+    // const jobOffers = await page.evaluate(() => {
+    //   // Znalezienie wszystkich elementów z ofertami pracy
+    //   const offerElements = document.querySelectorAll(
+    //     ".MuiBox-root.css-ai36e1"
+    //   );
+
+    //   // Mapowanie przez każdy element, aby zebrać dane
+    //   return Array.from(offerElements).map((offerElement) => {
+    //     const title = offerElement.querySelector("h3")?.textContent || "";
+
+    //     return {
+    //       title,
+    //     };
+    //   });
+    // });
+
+    for (const element of elements) {
+      const title = await page.evaluate(
+        (el) => el.querySelector("h3")?.textContent || "",
+        element
+      );
+
+      const location = await page.evaluate(
+        (el) => el.querySelector(".css-1o4wo1x")?.textContent || "",
+        element
+      );
+
+      jobOffers.push({ title, location });
+    }
+
+    return jobOffers;
+  }
+
+  private async collectJobsData(page: Page): Promise<string[]> {
     const elements = await page.$$("a[target='_parent']");
 
     const jobLinks = [];
@@ -88,12 +139,12 @@ export default class ScrapeJustJoinIT {
     return jobLinks;
   }
 
-  private async scrollAndCollectLinks(page: Page) {
-    let allJobLinks: string[] = [];
+  private async scrollAndCollectLinks(page: Page): Promise<{}[]> {
+    let allJobLinks: {}[] = [];
     let previousHeight = 0;
 
     while (true) {
-      const jobLinks = await this.collectJobLinks(page);
+      const jobLinks = await this.collectData(page);
       allJobLinks = [...new Set([...allJobLinks, ...jobLinks])];
 
       await autoScroll(page);
@@ -101,6 +152,7 @@ export default class ScrapeJustJoinIT {
       const currentHeight = await page.evaluate(
         () => document.body.scrollHeight
       );
+
       if (currentHeight === previousHeight) {
         break;
       }
@@ -110,5 +162,37 @@ export default class ScrapeJustJoinIT {
     return allJobLinks;
   }
 
-  private async collectJobOffersDetails(page: Page, jobLinks: string[]) {}
+  // private async collectJobOffersDetails(cluster: Cluster, jobLinks: string[]) {
+  //   await cluster.task(async ({ page, data: jobLink }) => {
+  //     await page.goto(jobLink);
+  //     let isBtnDisabled = false;
+
+  //     while (!isBtnDisabled) {
+  //       await page.waitForSelector("h1");
+  //     }
+  //   });
+
+  //   await cluster.queue(jobLinks);
+  // }
+
+  // private async initCluster(): Promise<Cluster> {
+  //   try {
+  //     return await Cluster.launch({
+  //       concurrency: Cluster.CONCURRENCY_PAGE,
+  //       maxConcurrency: 100,
+  //       monitor: true,
+  //       puppeteerOptions: {
+  //         headless: false,
+  //         userDataDir: "./tmp",
+  //       },
+  //     });
+  //   } catch (err) {
+  //     throw new BadRequestError({
+  //       message: "Failed to initialize cluster",
+  //       logging: true,
+  //       code: 400,
+  //       context: { error: err },
+  //     });
+  //   }
+  // }
 }

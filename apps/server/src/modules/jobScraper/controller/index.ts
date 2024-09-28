@@ -11,9 +11,9 @@ export const jobScraperController = async (
     console.log("Job Scraper Controller");
 
     const jobQuery: JobQuery = req.jobQuery;
-    await jobScraperService.scrapeJobs(jobQuery, next);
+    const jobs = await jobScraperService.scrapeJobs(jobQuery, next);
 
-    return res.status(200).json({ message: "Job Scraper Controller" });
+    return res.status(200).json({ jobs });
   } catch (err) {
     next(err);
   }
