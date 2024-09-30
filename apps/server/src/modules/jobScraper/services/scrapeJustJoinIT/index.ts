@@ -5,7 +5,6 @@ import { Page } from "puppeteer";
 import BadRequestError from "../../../../errors/badRequestError";
 import { SearchJobOffers } from "../../interfaces";
 import { autoScroll } from "../../helpers/autoScroll";
-import { Cluster } from "puppeteer-cluster";
 
 export default class ScrapeJustJoinIT {
   private browser: Browser;
@@ -23,7 +22,7 @@ export default class ScrapeJustJoinIT {
 
       await this.openPage(page, path, next);
       await this.searchJobOffers({ page, jobQuery, path, next });
-      const jobs = await this.scrollAndCollectLinks(page);
+      const jobs = await this.scrollAndCollectData(page, 100);
 
       console.log(jobs);
       await this.browser.close();
@@ -93,22 +92,6 @@ export default class ScrapeJustJoinIT {
 
     const jobOffers = [];
 
-    // const jobOffers = await page.evaluate(() => {
-    //   // Znalezienie wszystkich elementów z ofertami pracy
-    //   const offerElements = document.querySelectorAll(
-    //     ".MuiBox-root.css-ai36e1"
-    //   );
-
-    //   // Mapowanie przez każdy element, aby zebrać dane
-    //   return Array.from(offerElements).map((offerElement) => {
-    //     const title = offerElement.querySelector("h3")?.textContent || "";
-
-    //     return {
-    //       title,
-    //     };
-    //   });
-    // });
-
     for (const element of elements) {
       const title = await page.evaluate(
         (el) => el.querySelector("h3")?.textContent || "",
@@ -120,48 +103,67 @@ export default class ScrapeJustJoinIT {
         element
       );
 
-      jobOffers.push({ title, location });
+      const url = await page.evaluate(
+        (el) => el.querySelector("a")?.href || "",
+        element
+      );
+
+      jobOffers.push({ title, location, url });
     }
 
     return jobOffers;
   }
 
-  private async collectJobsData(page: Page): Promise<string[]> {
-    const elements = await page.$$("a[target='_parent']");
+  private async scrollAndCollectData(
+    page: Page,
+    itemTargetCount: number
+  ): Promise<{}[]> {
+    let allJobs: {}[] = [];
+    let previousHeight: number;
 
-    const jobLinks = [];
+    while (itemTargetCount > allJobs.length) {
+      // const jobs = await this.collectData(page);
+      allJobs = await this.collectData(page);
 
-    for (const element of elements) {
-      const href = await page.evaluate((el) => el.href, element);
-      jobLinks.push(href);
-    }
+      // await autoScroll(page);
 
-    return jobLinks;
-  }
-
-  private async scrollAndCollectLinks(page: Page): Promise<{}[]> {
-    let allJobLinks: {}[] = [];
-    let previousHeight = 0;
-
-    while (true) {
-      const jobLinks = await this.collectData(page);
-      allJobLinks = [...new Set([...allJobLinks, ...jobLinks])];
-
-      await autoScroll(page);
-
-      const currentHeight = await page.evaluate(
-        () => document.body.scrollHeight
+      previousHeight = await page.evaluate(() => document.body.scrollHeight);
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      await page.waitForFunction(
+        () => document.body.scrollHeight > previousHeight
       );
 
-      if (currentHeight === previousHeight) {
-        break;
-      }
-      previousHeight = currentHeight;
+      
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // const currentHeight = await page.evaluate(
+      //   () => document.body.scrollHeight
+      // );
+
+      // if (currentHeight === previousHeight) {
+      //   console.log("currentHeight", currentHeight);
+      //   console.log("previousHeight", previousHeight);
+
+      //   break;
+      // }
+      // previousHeight = currentHeight;
     }
 
-    return allJobLinks;
+    return allJobs;
   }
 
+  // private async collectJobsData(page: Page): Promise<string[]> {
+  //   const elements = await page.$$("a[target='_parent']");
+
+  //   const jobLinks = [];
+
+  //   for (const element of elements) {
+  //     const href = await page.evaluate((el) => el.href, element);
+  //     jobLinks.push(href);
+  //   }
+
+  //   return jobLinks;
+  // }
   // private async collectJobOffersDetails(cluster: Cluster, jobLinks: string[]) {
   //   await cluster.task(async ({ page, data: jobLink }) => {
   //     await page.goto(jobLink);
