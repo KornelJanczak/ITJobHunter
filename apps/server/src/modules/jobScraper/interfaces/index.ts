@@ -15,3 +15,9 @@ export interface SearchJobOffers {
   path: string;
   next: NextFunction;
 }
+
+export interface JustJoinITOffer {
+  title: string;
+  location: string;
+  url: string;
+}
