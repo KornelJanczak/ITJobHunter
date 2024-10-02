@@ -5,6 +5,9 @@ import ScrapeJustJoinIT from "./scrapeJustJoinIT";
 import { ScrapeOptions } from "../interfaces";
 import { NextFunction } from "express";
 import BadRequestError from "../../../errors/badRequestError";
+import { defaultPageOpener } from "./scrapeJustJoinIT/defaultPageOpener";
+import { defaultDataCollector } from "./scrapeJustJoinIT/defaultDataCollector";
+import { defaultJobSearcher } from "./scrapeJustJoinIT/defaultJobSearcher";
 
 const urls = {
   justJoinIT: "https://justjoin.it/",
@@ -59,7 +62,14 @@ class JobScraperService {
         code: 400,
         message: "Browser not initialized",
       });
-    const scrapeJustJoinIt = new ScrapeJustJoinIT(this.browser);
+
+    const scrapeJustJoinIt = new ScrapeJustJoinIT({
+      browser: this.browser,
+      jobSearcher: defaultJobSearcher,
+      dataCollector: defaultDataCollector,
+      pageOpener: defaultPageOpener,
+    });
+
     return { scrapeJustJoinIt };
   }
 }
