@@ -12,15 +12,22 @@ class DefaultJobSearcher implements JobSearcher {
     path,
     next,
   }: SearchJobOffers): Promise<void> {
-    const { content, techStack, positionLevel } = jobQuery;
+    const {
+      content,
+      techStack,
+      positionLevel,
+      minimumSalary,
+      maximumSalary,
+      jobType,
+      location,
+    } = jobQuery;
 
-    if (techStack) {
-      const javaScriptIsThere = techStack.find((tech) => tech === "js");
-      if (javaScriptIsThere) path += "/javascript";
-    }
-
-    if (content) path += `?keyword=${content}`;
-    if (positionLevel) path += `/experience-level_${positionLevel}`;
+    path = this.filterTechStack(path, techStack);
+    path = this.filterContent(path, content);
+    path = this.filterPositionLevel(path, positionLevel);
+    path = this.filterSallary(path, minimumSalary, maximumSalary);
+    path = this.filterJobType(path, jobType);
+    path = this.filterLocation(path, location);
 
     try {
       await page.goto(path);
@@ -34,6 +41,70 @@ class DefaultJobSearcher implements JobSearcher {
         })
       );
     }
+  }
+
+  private filterTechStack(
+    path: string,
+    techStack: string[] | undefined
+  ): string {
+    if (techStack) {
+      const javaScriptIsThere = techStack.find((tech) => tech === "js");
+      if (javaScriptIsThere) path += "/javascript";
+    }
+
+    console.log("TECH STACK", path);
+
+    return path;
+  }
+
+  private filterContent(path: string, content: string | undefined): string {
+    if (content) path += `?keyword=${content}`;
+    return path;
+  }
+
+  private filterPositionLevel(
+    path: string,
+    positionLevel: string | undefined
+  ): string {
+    if (positionLevel) path += `/experience-level_${positionLevel}`;
+
+    console.log("Position LEVEL", positionLevel);
+
+    return path;
+  }
+
+  private filterSallary(
+    path: string,
+    minimumSalary: number | undefined,
+    maximumSalary: number | undefined
+  ): string {
+    if (minimumSalary) path += `/salary_${minimumSalary}.10000`;
+    if (maximumSalary) path += `/salary_0.${maximumSalary}`;
+    if (minimumSalary && maximumSalary)
+      path += `/salary_${minimumSalary}.${maximumSalary}`;
+    return path;
+  }
+
+  private filterJobType(path: string, jobType: string[] | undefined): string {
+    if (jobType) {
+      const formattedJobs = jobType.map((job) => {
+        if (job === "fullTime") return "full-time";
+        if (job === "partTime") return "part-time";
+        return job;
+      });
+      const isRemote = formattedJobs.find((job) => job === "remote");
+      if (isRemote) {
+        path += `/working-hours_${formattedJobs.join(".")}/remote_yes`;
+      } else {
+        path += `/working-hours_${formattedJobs.join(".")}`;
+      }
+    }
+    return path;
+  }
+
+  private filterLocation(path: string, location: string | undefined): string {
+    if (location) path += `/${location}`;
+    return path;
   }
 }
 
