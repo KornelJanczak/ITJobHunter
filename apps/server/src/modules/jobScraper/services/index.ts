@@ -5,9 +5,9 @@ import ScrapeJustJoinIT from "./scrapeJustJoinIT";
 import { ScrapeOptions } from "../interfaces";
 import { NextFunction } from "express";
 import BadRequestError from "../../../errors/badRequestError";
-import { defaultPageOpener } from "./scrapeJustJoinIT/defaultPageOpener";
-import { defaultDataCollector } from "./scrapeJustJoinIT/defaultDataCollector";
-import { defaultJobSearcher } from "./scrapeJustJoinIT/defaultJobSearcher";
+import { pageOpener } from "./scrapeJustJoinIT/pageOpener";
+import { dataCollector } from "./scrapeJustJoinIT/dataCollector";
+import { jobSearcher } from "./scrapeJustJoinIT/jobSearcher";
 
 const urls = {
   justJoinIT: "https://justjoin.it/",
@@ -65,9 +65,9 @@ class JobScraperService {
 
     const scrapeJustJoinIt = new ScrapeJustJoinIT({
       browser: this.browser,
-      jobSearcher: defaultJobSearcher,
-      dataCollector: defaultDataCollector,
-      pageOpener: defaultPageOpener,
+      jobSearcher,
+      dataCollector,
+      pageOpener,
     });
 
     return { scrapeJustJoinIt };
