@@ -1,9 +1,9 @@
 import { Browser } from "puppeteer";
 import { JustJoinITOffer, ScrapeOptions } from "../../interfaces";
 import BadRequestError from "../../../../errors/badRequestError";
-import { type DataCollector } from "./defaultDataCollector";
-import { type JobSearcher } from "./defaultJobSearcher";
-import { type PageOpener } from "./defaultPageOpener";
+import { type IDataCollector } from "./dataCollector";
+import { type IJobSearcher } from "./jobSearcher";
+import { type IPageOpener } from "./pageOpener";
 
 interface JustJoinITScraper {
   scrape(options: ScrapeOptions): Promise<JustJoinITOffer[]>;
@@ -11,16 +11,16 @@ interface JustJoinITScraper {
 
 interface ScrapeJustJoinITConfig {
   browser: Browser;
-  pageOpener: PageOpener;
-  jobSearcher: JobSearcher;
-  dataCollector: DataCollector;
+  pageOpener: IPageOpener;
+  jobSearcher: IJobSearcher;
+  dataCollector: IDataCollector;
 }
 
 export default class ScrapeJustJoinIT implements JustJoinITScraper {
   private browser: Browser;
-  private pageOpener: PageOpener;
-  private jobSearcher: JobSearcher;
-  private dataCollector: DataCollector;
+  private pageOpener: IPageOpener;
+  private jobSearcher: IJobSearcher;
+  private dataCollector: IDataCollector;
 
   constructor(config: ScrapeJustJoinITConfig) {
     this.browser = config.browser;
@@ -31,17 +31,16 @@ export default class ScrapeJustJoinIT implements JustJoinITScraper {
 
   async scrape({ url, jobQuery, next }: ScrapeOptions) {
     try {
-      console.log(jobQuery, "JobQuery");
-      const { location } = jobQuery;
       const page = await this.browser.newPage();
-      let path = `${url}/${location ? location : "all-locations"}`;
+      await this.pageOpener.openPage(page, url, next);
+      await this.jobSearcher.searchJobOffers({
+        page,
+        jobQuery,
+        path: url,
+        next,
+      });
 
-      await this.pageOpener.openPage(page, path, next);
-      await this.jobSearcher.searchJobOffers({ page, jobQuery, path, next });
-      const jobs = await this.dataCollector.scrollAndCollectData(page);
-      await this.browser.close();
-
-      return jobs;
+      return await this.dataCollector.scrollAndCollectData(page);
     } catch (err) {
       throw new BadRequestError({
         message: "Failed to scrape JustJoinIT",
@@ -49,6 +48,8 @@ export default class ScrapeJustJoinIT implements JustJoinITScraper {
         code: 400,
         context: { error: err },
       });
+    } finally {
+      await this.browser.close();
     }
   }
 }
