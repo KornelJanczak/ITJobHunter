@@ -5,7 +5,8 @@ export const errorHandler = (
   err: AppError | Error,
   _: Request,
   res: Response,
-  __: NextFunction
+  __: NextFunction,
+
 ) => {
   if (err instanceof AppError) {
     const { statusCode, errors, logging } = err;
@@ -29,11 +30,9 @@ export const errorHandler = (
   if (err instanceof Error) {
     let statusCode = res.statusCode !== 200 ? res.statusCode : 500;
     console.error(JSON.stringify(err, null, 2));
-    return res
-      .status(statusCode)
-      .send({
-        errors: [{ message: err.message, statusCode, stack: err.stack }],
-      });
+    return res.status(statusCode).send({
+      errors: [{ message: err.message, statusCode, stack: err.stack }],
+    });
   }
 
   console.error(JSON.stringify(err, null, 2));
