@@ -1,76 +1,37 @@
 import { JobQuery } from "@repo/interfaces/job";
-import puppeteer from "puppeteer-extra";
-import { Browser } from "puppeteer";
-import ScrapeJustJoinIT from "./scrapeJustJoinIT";
 import { ScrapeOptions } from "../interfaces";
 import { NextFunction } from "express";
-import BadRequestError from "../../../errors/badRequestError";
-import { pageOpener } from "./scrapeJustJoinIT/pageOpener";
-import { dataCollector } from "./scrapeJustJoinIT/dataCollector";
-import { jobSearcher } from "./scrapeJustJoinIT/jobSearcher";
+import { scrapeJustJoinIT } from "./scrapeJustJoinIT";
 
-const urls = {
-  justJoinIT: "https://justjoin.it/",
-  noFluffJobs: "https://nofluffjobs.com/",
-  protocolIT: "https://theprotocol.it/",
-  pracujPL: "https://www.pracuj.pl/",
-};
+interface IJobScraperService {
+  scrapeJobs(jobQuery: JobQuery, next: NextFunction): Promise<any>;
+}
 
-class JobScraperService {
-  private browser: Browser | null = null;
+class JobScraperService implements IJobScraperService {
+  urls = {
+    justJoinIT: "https://justjoin.it/",
+    noFluffJobs: "https://nofluffjobs.com/",
+    protocolIT: "https://theprotocol.it/",
+    pracujPL: "https://www.pracuj.pl/",
+  };
 
   async scrapeJobs(jobQuery: JobQuery, next: NextFunction) {
-    await this.initBrowser();
     const jobs = await this.gatherJobs({
       jobQuery,
       next,
-      url: urls.justJoinIT,
+      url: this.urls.justJoinIT,
     });
 
-    await this.closeBrowser();
     return jobs;
-  }
-
-  private async initBrowser() {
-    this.browser = await puppeteer.launch({
-      headless: false,
-      defaultViewport: null,
-    });
-  }
-
-  private async closeBrowser() {
-    if (this.browser) {
-      await this.browser.close();
-      this.browser = null;
-    }
   }
 
   private async gatherJobs(scrapeOptions: ScrapeOptions) {
-    const { scrapeJustJoinIt } = this.initScrapers();
-
-    const jobs = await scrapeJustJoinIt.scrape({
+    const jobs = await scrapeJustJoinIT.scrape({
       ...scrapeOptions,
-      url: urls.justJoinIT,
+      url: this.urls.justJoinIT,
     });
 
     return jobs;
-  }
-
-  private initScrapers(): { scrapeJustJoinIt: ScrapeJustJoinIT } {
-    if (!this.browser)
-      throw new BadRequestError({
-        code: 400,
-        message: "Browser not initialized",
-      });
-
-    const scrapeJustJoinIt = new ScrapeJustJoinIT({
-      browser: this.browser,
-      jobSearcher,
-      dataCollector,
-      pageOpener,
-    });
-
-    return { scrapeJustJoinIt };
   }
 }
 
