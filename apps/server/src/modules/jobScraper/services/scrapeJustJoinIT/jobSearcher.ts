@@ -1,11 +1,8 @@
-import { SearchJobOffers } from "../../interfaces";
+import { type IJobSearcher } from "../../interfaces";
+import { type JustJoinITOffer, type SearchJobOffers } from "../../interfaces";
 import BadRequestError from "../../../../errors/badRequestError";
 
-export interface IJobSearcher {
-  searchJobOffers(options: SearchJobOffers): Promise<void>;
-}
-
-class JobSearcher implements IJobSearcher {
+class JobSearcher implements IJobSearcher<JustJoinITOffer> {
   async searchJobOffers({
     page,
     jobQuery,
