@@ -1,12 +1,9 @@
-import { Page } from "puppeteer";
+import { type IPageOpener, type JustJoinITOffer } from "../../interfaces";
+import { type NextFunction } from "express";
+import { type Page } from "puppeteer";
 import BadRequestError from "../../../../errors/badRequestError";
-import { NextFunction } from "express";
 
-export interface IPageOpener {
-  openPage(page: Page, path: string, next: NextFunction): Promise<void>;
-}
-
-class PageOpener implements IPageOpener {
+class PageOpener implements IPageOpener<JustJoinITOffer> {
   async openPage(page: Page, path: string, next: NextFunction): Promise<void> {
     try {
       await page.goto(path);
