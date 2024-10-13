@@ -15,12 +15,18 @@ export interface SearchJobOffers {
   next: NextFunction;
 }
 
-export interface JustJoinITOffer {
+export interface JobOffer {
   title: string;
   location: string;
   url: string;
 }
 
+export interface JustJoinITOffer {
+  title: string;
+  location: string;
+  url: string;
+}
+``
 export interface ICoreJobScraperService {
   initBrowser(): Promise<void>;
   closeBrowser(): Promise<void>;
