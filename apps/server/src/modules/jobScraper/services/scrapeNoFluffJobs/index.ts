@@ -1,14 +1,19 @@
-import { JobQuery } from "@repo/interfaces/job";
-import { NextFunction } from "express";
+import { type Page } from "puppeteer";
+import CoreJobScraperService from "../coreJobScraperService";
+import {
+  type IJobScraperService,
+  type JobOffer,
+  type ScrapeOptions,
+} from "../../interfaces";
 
-interface INoFluffJobsScraperService {
-  scrape(jobQuery: JobQuery, next: NextFunction): Promise<any>;
-}
-
-class NoFluffJobsScraperService implements INoFluffJobsScraperService {
-  async scrape(jobQuery: JobQuery, next: NextFunction) {
-    return "NoFluffJobsScraperService";
-  }
+class NoFluffJobsScraperService<T extends JobOffer>
+  extends CoreJobScraperService
+  implements IJobScraperService<T>
+{
+  protected async executeScrape(
+    page: Page,
+    options: ScrapeOptions
+  ): Promise<any> {}
 }
 
 export const noFluffJobsScraperService = new NoFluffJobsScraperService();
