@@ -1,4 +1,5 @@
 import { type SearchJobOffers } from "../../interfaces";
+import { type Page } from "puppeteer";
 
 export abstract class AbstractJobSearcher {
   abstract searchJobOffers({
