@@ -2,6 +2,7 @@ import { JobOffer, type IJobSearcher } from "../../interfaces";
 import { type JustJoinITOffer, type SearchJobOffers } from "../../interfaces";
 import BadRequestError from "../../../../errors/badRequestError";
 import { AbstractJobSearcher } from "../abstract/abstractJobSearcher";
+import { Page } from "puppeteer";
 
 class JobSearcher
   extends AbstractJobSearcher
@@ -30,7 +31,11 @@ class JobSearcher
     path = this.filterSalary(path, minimumSalary, maximumSalary);
     path = this.filterJobType(path, jobType);
 
+    console.log("AFTER job searcher");
+
     try {
+      console.log(page);
+
       await page.goto(path);
     } catch (err) {
       next(
