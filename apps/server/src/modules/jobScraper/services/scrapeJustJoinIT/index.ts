@@ -8,13 +8,13 @@ import {
   JustJoinITOffer,
   ScrapeOptions,
 } from "../../interfaces";
-import CoreJobScraperService from "../coreJobScraperService";
+import AbstractScraperService from "../abstract/abstractScraperService";
 import { pageOpener } from "./pageOpener";
 import { dataCollector } from "./dataCollector";
 import { jobSearcher } from "./jobSearcher";
 
 class ScrapeJustJoinIT<T extends JustJoinITOffer>
-  extends CoreJobScraperService
+  extends AbstractScraperService
   implements IJobScraperService<T>
 {
   private pageOpener: IPageOpener<T>;
