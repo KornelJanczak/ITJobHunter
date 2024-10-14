@@ -26,7 +26,7 @@ export interface JustJoinITOffer {
   location: string;
   url: string;
 }
-``
+
 export interface ICoreJobScraperService {
   initBrowser(): Promise<void>;
   closeBrowser(): Promise<void>;
@@ -45,12 +45,7 @@ export interface IJobSearcher<T> {
   searchJobOffers(options: SearchJobOffers): Promise<void>;
 }
 
-export interface IPageOpener<T> {
-  openPage(page: Page, path: string, next: NextFunction): Promise<void>;
-}
-
 export interface IScraperServiceDependencies<T> {
-  pageOpener: IPageOpener<T>;
   jobSearcher: IJobSearcher<T>;
   dataCollector: IDataCollector<T>;
 }
