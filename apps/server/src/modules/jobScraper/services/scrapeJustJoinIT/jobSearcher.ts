@@ -1,8 +1,12 @@
-import { type IJobSearcher } from "../../interfaces";
+import { JobOffer, type IJobSearcher } from "../../interfaces";
 import { type JustJoinITOffer, type SearchJobOffers } from "../../interfaces";
 import BadRequestError from "../../../../errors/badRequestError";
+import { AbstractJobSearcher } from "../abstract/abstractJobSearcher";
 
-class JobSearcher implements IJobSearcher<JustJoinITOffer> {
+class JobSearcher
+  extends AbstractJobSearcher
+  implements IJobSearcher<JobOffer>
+{
   async searchJobOffers({
     page,
     jobQuery,
@@ -23,7 +27,7 @@ class JobSearcher implements IJobSearcher<JustJoinITOffer> {
     path = this.filterTechStack(path, techStack);
     path = this.filterContent(path, content);
     path = this.filterPositionLevel(path, positionLevel);
-    path = this.filterSallary(path, minimumSalary, maximumSalary);
+    path = this.filterSalary(path, minimumSalary, maximumSalary);
     path = this.filterJobType(path, jobType);
 
     try {
@@ -40,7 +44,7 @@ class JobSearcher implements IJobSearcher<JustJoinITOffer> {
     }
   }
 
-  private filterLocation(path: string, location: string | undefined): string {
+  protected filterLocation(path: string, location: string | undefined): string {
     if (location) {
       path += `/${location}`;
     } else {
@@ -49,7 +53,7 @@ class JobSearcher implements IJobSearcher<JustJoinITOffer> {
     return path;
   }
 
-  private filterTechStack(
+  protected filterTechStack(
     path: string,
     techStack: string[] | undefined
   ): string {
@@ -63,12 +67,12 @@ class JobSearcher implements IJobSearcher<JustJoinITOffer> {
     return path;
   }
 
-  private filterContent(path: string, content: string | undefined): string {
+  protected filterContent(path: string, content: string | undefined): string {
     if (content) path += `?keyword=${content}`;
     return path;
   }
 
-  private filterPositionLevel(
+  protected filterPositionLevel(
     path: string,
     positionLevel: string | undefined
   ): string {
@@ -79,7 +83,7 @@ class JobSearcher implements IJobSearcher<JustJoinITOffer> {
     return path;
   }
 
-  private filterSallary(
+  protected filterSalary(
     path: string,
     minimumSalary: number | undefined,
     maximumSalary: number | undefined
@@ -91,7 +95,7 @@ class JobSearcher implements IJobSearcher<JustJoinITOffer> {
     return path;
   }
 
-  private filterJobType(path: string, jobType: string[] | undefined): string {
+  protected filterJobType(path: string, jobType: string[] | undefined): string {
     if (jobType) {
       const formattedJobs = jobType.map((job) => {
         if (job === "fullTime") return "full-time";
