@@ -41,8 +41,7 @@ export default function createApp(): Application {
   app.use(passport.session());
   app.use("/api", router());
 
-  // Error handling middleware should be placed after all other middleware and routes
-  app.use(errorHandler );
-  
+  app.use(errorHandler);
+
   return app;
 }

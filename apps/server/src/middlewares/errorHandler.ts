@@ -1,12 +1,11 @@
-import { NextFunction, Request, Response } from "express";
+import { type NextFunction, type Request, type Response } from "express";
 import { AppError } from "../errors/appError";
 
 export const errorHandler = (
   err: AppError | Error,
-  _: Request,
+  req: Request,
   res: Response,
-  __: NextFunction,
-
+  next: NextFunction
 ) => {
   if (err instanceof AppError) {
     const { statusCode, errors, logging } = err;

@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import { z, ZodError, ZodEffects, ZodObject } from "zod";
 import { StatusCodes } from "http-status-codes";
 import BadRequestError from "../errors/badRequestError";
-import { JobQuery } from "@repo/interfaces/job";
 
 export const validateData = (
   schema: z.ZodObject<any> | ZodEffects<ZodObject<any>>
