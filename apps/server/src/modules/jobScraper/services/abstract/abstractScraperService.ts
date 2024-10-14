@@ -6,15 +6,16 @@ export default abstract class AbstractScraperService {
   protected browser: Browser | null = null;
 
   constructor() {
-    this.initBrowser();
+    // this.initBrowser();
   }
 
   async initBrowser() {
-    if (this.browser) {
+    if (!this.browser) {
       this.browser = await puppeteer.launch({
         headless: false,
         defaultViewport: null,
       });
+      console.log("Browser initialized");
     }
   }
 
@@ -52,9 +53,6 @@ export default abstract class AbstractScraperService {
         code: 400,
         context: { error: err },
       });
-    } finally {
-      await page.close();
-      await this.closeBrowser();
     }
   }
 }
