@@ -30,10 +30,10 @@ export class JobSearcher extends AbstractJobSearcher {
         path += `/${techStack[0]}`;
         break;
       default:
-        path += `/${techStack[0]}`;
-        for (let i = 1; i < techStack.length; i++) {
-          path += `+${techStack[i]}`;
-        }
+        console.log(techStack);
+        const basePath = path.split("?")[0]; // Pobierz bazową część ścieżki bez parametrów
+        const criteria = `criteria=requirement%3D${techStack.map(encodeURIComponent).join(",")}`;
+        path = `${basePath}?${criteria}`;
         break;
     }
 
