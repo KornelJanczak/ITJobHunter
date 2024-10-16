@@ -8,15 +8,25 @@ export class JobSearcher extends AbstractJobSearcher {
     path,
     next,
   }: SearchJobOffers): Promise<void> {
-    path = this.filterTechStack(path, jobQuery.techStack);
-    await page.goto(path);
+    const {
+      content,
+      techStack,
+      positionLevel,
+      minimumSalary,
+      maximumSalary,
+      jobType,
+      location,
+    } = jobQuery;
 
-    // Implementation will go here
+    path = this.filterLocation(path, location);
+    path = this.filterTechStack(path, techStack);
+    path = this.filterPositionLevel(path, positionLevel);
+    path = this.filterContent(path, content);
+    await page.goto(path);
   }
 
   protected filterLocation(path: string, location: string | undefined): string {
-    // Implementation will go here
-    return path;
+    return (path += `/${location}`);
   }
 
   protected filterTechStack(
@@ -31,9 +41,9 @@ export class JobSearcher extends AbstractJobSearcher {
         break;
       default:
         console.log(techStack);
-        const basePath = path.split("?")[0]; // Pobierz bazową część ścieżki bez parametrów
+        const basePath = path.split("?")[0];
         const criteria = `criteria=requirement%3D${techStack.map(encodeURIComponent).join(",")}`;
-        path = `${basePath}?${criteria}`;
+        path += `${basePath}?${criteria}`;
         break;
     }
 
@@ -41,15 +51,31 @@ export class JobSearcher extends AbstractJobSearcher {
   }
 
   protected filterContent(path: string, content: string | undefined): string {
-    // Implementation will go here
-    return path;
+    const basePath = path.split("?")[0];
+    const criteria = `criteria=requirement%3D${content}`;
+    return `${basePath}?${criteria}`;
   }
 
   protected filterPositionLevel(
     path: string,
     positionLevel: string | undefined
   ): string {
-    // Implementation will go here
+    let criteria: string = "";
+    let basePath = path.split("?")[0];
+
+    switch (positionLevel) {
+      case "junior":
+        const seniorities = ["junior", "trainee"];
+        criteria = `criteria=seniority%3D${seniorities.map(encodeURIComponent).join(",")}`;
+        path += `${basePath}?${criteria}`;
+        break;
+      default:
+        if (positionLevel) {
+          criteria = `criteria=seniority%3D${encodeURIComponent(positionLevel)}`;
+          path += `${basePath}?${criteria}`;
+        }
+        break;
+    }
     return path;
   }
 
