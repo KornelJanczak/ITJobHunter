@@ -8,8 +8,8 @@ export const jobScraperController = async (
   next: NextFunction
 ) => {
   try {
+    // debugger;
     console.log("Job Scraper Controller");
-
     const jobQuery: Partial<JobQuery> = req.jobQuery || {};
     const jobs = await jobScraperService.scrapeJobs(jobQuery, next);
 
