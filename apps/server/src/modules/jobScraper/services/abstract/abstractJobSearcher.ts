@@ -34,8 +34,8 @@ export abstract class AbstractJobSearcher {
     maximumSalary: number | undefined
   ): string;
 
-  protected abstract filterJobType(
-    path: string,
-    jobType: string[] | undefined
-  ): string;
+  // protected abstract filterJobType(
+  //   path: string,
+  //   jobType: string[] | undefined
+  // ): string;
 }
