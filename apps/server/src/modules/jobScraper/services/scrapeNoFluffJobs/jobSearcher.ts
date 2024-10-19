@@ -18,13 +18,15 @@ export class JobSearcher extends AbstractJobSearcher {
     this.path = this.filterLocation();
     this.path = this.filterTypeOfWorkplace();
     this.path = this.filterTechStack();
-
-    // path = this.filterJobType(path, jobType);
     this.path = this.filterPositionLevel();
     this.path = this.filterSalary();
     this.path = this.filterContent();
 
-    await page.goto(this.path);
+    try {
+      await page.goto(this.path);
+    } catch (err) {
+      next(err);
+    }
   }
   protected filterLocation(): string {
     const { location } = this.jobQuery ?? {};
@@ -75,9 +77,13 @@ export class JobSearcher extends AbstractJobSearcher {
   }
 
   protected filterContent(): string {
-    const basePath = this.path.split("?")[0];
-    const criteria = `criteria=requirement%3D${content}`;
-    return `${basePath}?${criteria}`;
+    const { content } = this.jobQuery ?? {};
+    if (!content) return this.path;
+
+    const newCriteria = `content%3D${encodeURIComponent(content)}`;
+    this.path = this.updateCriteria(newCriteria);
+
+    return this.path;
   }
 
   protected filterSalary(): string {
@@ -95,16 +101,6 @@ export class JobSearcher extends AbstractJobSearcher {
 
     return this.path;
   }
-
-  // protected filterJobType(path: string, jobType: string[] | undefined): string {
-  //   if (!jobType) return path;
-  //   if (jobType.length === 1) return (path += `/${jobType[0]}`);
-
-  //   const basePath = path.split("?")[0];
-  //   const criteria = `%3D${jobType.map(encodeURIComponent).join(",")}`;
-
-  //   return `${basePath}?${criteria}`;
-  // }
 
   private updateCriteria(newCriteria: string): string {
     const basePath = this.path.split("?")[0];
