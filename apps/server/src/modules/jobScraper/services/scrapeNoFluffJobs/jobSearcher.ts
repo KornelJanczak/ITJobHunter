@@ -26,7 +26,6 @@ export class JobSearcher extends AbstractJobSearcher {
 
     await page.goto(this.path);
   }
-
   protected filterLocation(): string {
     if (!this.jobQuery) return this.path;
     const { location } = this.jobQuery;
@@ -34,23 +33,26 @@ export class JobSearcher extends AbstractJobSearcher {
     return basePath;
   }
 
-  protected filterTechStack(): string {
-    if (!this.jobQuery) return this.path;
-    const { techStack } = this.jobQuery;
+  protected filterTypeOfWorkplace(): string {
+    const { typeOfWorkplace, location } = this.jobQuery ?? {};
 
+    const workplacePaths: { [key: string]: string } = {
+      remote: location ? "" : "/praca-zdalna",
+      hybrid: "/hybrid",
+      onSite: "/fieldWork",
+    };
+
+    return (this.path += typeOfWorkplace
+      ? (workplacePaths[typeOfWorkplace] ?? this.path)
+      : "");
+  }
+
+  protected filterTechStack(): string {
+    const { techStack } = this.jobQuery ?? {};
     if (!techStack) return this.path;
 
-    switch (techStack.length) {
-      case 1:
-        this.path += `/${techStack[0]}`;
-        break;
-      default:
-        console.log(techStack);
-        const basePath = this.path.split("?")[0];
-        const criteria = `criteria=requirement%3D${techStack.map(encodeURIComponent).join(",")}`;
-        this.path = `${basePath}?${criteria}`;
-        break;
-    }
+    const newCriteria = `requirement%3D${techStack.map(encodeURIComponent).join(",")}`;
+    this.path = this.updateCriteria(newCriteria);
 
     return this.path;
   }
@@ -119,18 +121,17 @@ export class JobSearcher extends AbstractJobSearcher {
   //   return `${basePath}?${criteria}`;
   // }
 
-  protected filterTypeOfWorkplace(): string {
-    const { typeOfWorkplace, location } = this.jobQuery ?? {};
+  private updateCriteria(newCriteria: string): string {
+    const basePath = this.path.split("?")[0];
+    const existingCriteria = new URLSearchParams(this.path.split("?")[1]);
 
-    const workplacePaths: { [key: string]: string } = {
-      remote: location ? "" : "/praca-zdalna",
-      hybrid: "/hybrid",
-      onSite: "/fieldWork",
-    };
+    const criteria = existingCriteria.get("criteria");
+    const updatedCriteria = criteria
+      ? `${criteria}%20${newCriteria}`
+      : newCriteria;
 
-    return (this.path += typeOfWorkplace
-      ? (workplacePaths[typeOfWorkplace] ?? this.path)
-      : "");
+    existingCriteria.set("criteria", updatedCriteria);
+    return `${basePath}?${existingCriteria.toString()}`;
   }
 }
 
