@@ -31,7 +31,9 @@ class DataCollector
       }
     }
 
-    return jobOffers;
+    return jobOffers.map(
+      (job) => (job = { ...job, url: `https://justjoin.it${job.url}` })
+    );
   }
 
   async scrollAndCollectData(page: Page): Promise<JustJoinITOffer[]> {
