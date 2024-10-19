@@ -28,21 +28,15 @@ class ScrapeJustJoinIT<T extends JustJoinITOffer>
     page: Page,
     { url, jobQuery, next }: ScrapeOptions
   ): Promise<T[]> {
-    console.log("Open page");
-
-    console.log("Page v1", page);
-
     await this.jobSearcher.searchJobOffers({
       page,
       jobQuery,
       path: url,
       next,
     });
-    // await this.pageOpener.openPage(page, url, next);
 
-    console.log("Before data collector");
-
-    return await this.dataCollector.scrollAndCollectData(page);
+    const jobs = await this.dataCollector.scrollAndCollectData(page);
+    return jobs;
   }
 }
 
