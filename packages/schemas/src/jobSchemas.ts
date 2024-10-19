@@ -8,10 +8,7 @@ export const jobQuerySchema = z.object({
   location: z.string().optional(),
   minimumSalary: z.number().optional(),
   maximumSalary: z.number().optional(),
-  jobType: z
-    .array(z.enum(["fullTime", "partTime", "contract", "remote", "intership"]))
-    .optional(),
-  lastUpdated: z.number().optional(),
+  jobType: z.array(z.enum(["fullTime", "partTime"])).optional(),
   typeOfWorkplace: z.enum(["onSite", "hybrid", "remote"]).optional(),
   positionLevel: z.enum(["junior", "senior", "leader", "manager"]).optional(),
   techStack: z
