@@ -1,10 +1,17 @@
-import { JobQuery } from "@repo/interfaces/job";
-import { type SearchJobOffers } from "../../interfaces";
+import { type JobQuery } from "@repo/interfaces/job";
+import {
+  type SearchJobOffers,
+  type IJobSearcher,
+  type JobOffer,
+} from "../../interfaces";
 import { AbstractJobSearcher } from "../abstract/abstractJobSearcher";
 
-export class JobSearcher extends AbstractJobSearcher {
+export class JobSearcher
+  extends AbstractJobSearcher
+  implements IJobSearcher<JobOffer>
+{
   private jobQuery: JobQuery | null = null;
-  private path: string = "";
+  private path: URL = new URL("https://nofluffjobs.com/pl");
 
   async searchJobOffers({
     page,
@@ -13,27 +20,65 @@ export class JobSearcher extends AbstractJobSearcher {
     next,
   }: SearchJobOffers): Promise<void> {
     this.jobQuery = jobQuery;
-    this.path = path;
+    this.path = new URL(path);
 
-    this.path = this.filterLocation();
-    this.path = this.filterTypeOfWorkplace();
-    this.path = this.filterTechStack();
-    this.path = this.filterPositionLevel();
-    this.path = this.filterSalary();
-    this.path = this.filterContent();
+    this.filterJobOffers();
 
     try {
-      await page.goto(this.path);
+      await page.goto(this.path.toString());
     } catch (err) {
       next(err);
     }
   }
-  protected filterLocation(): string {
-    const { location } = this.jobQuery ?? {};
-    return (this.path += location ? `/${location}` : "");
+
+  private filterJobOffers(): void {
+    this.filterLocation();
+    this.filterTypeOfWorkplace();
+    this.filterTechStack();
+    this.filterPositionLevel();
+    this.filterSalary();
+    this.filterContent();
   }
 
-  protected filterTypeOfWorkplace(): string {
+  /**
+   * Updates the criteria in the URL with new criteria.
+   * @param newCriteria - The new criteria to add.
+   */
+  private updateCriteria(newCriteria: string): void {
+    const existingCriteria = this.path.searchParams.get("criteria");
+    const updatedCriteria = existingCriteria
+      ? `${existingCriteria}%20${newCriteria}`
+      : newCriteria;
+
+    this.path.searchParams.set("criteria", updatedCriteria);
+  }
+
+  /**
+   * Filters a generic criteria and updates the URL.
+   * @param key - The key of the criteria.
+   * @param value - The value of the criteria.
+   */
+  private filterCriteria(key: string, value?: string): void {
+    if (value) {
+      const newCriteria = `${key}%3D${encodeURIComponent(value)}`;
+      this.updateCriteria(newCriteria);
+    }
+  }
+
+  /**
+   * Filters the location and updates the path.
+   */
+  protected filterLocation(): void {
+    const { location } = this.jobQuery ?? {};
+    if (location) {
+      this.path.pathname += `/${location}`;
+    }
+  }
+
+  /**
+   * Filters the type of workplace and updates the path.
+   */
+  protected filterTypeOfWorkplace(): void {
     const { typeOfWorkplace, location } = this.jobQuery ?? {};
 
     const workplacePaths: { [key: string]: string } = {
@@ -42,77 +87,78 @@ export class JobSearcher extends AbstractJobSearcher {
       onSite: "/fieldWork",
     };
 
-    return (this.path += typeOfWorkplace
-      ? (workplacePaths[typeOfWorkplace] ?? this.path)
-      : "");
+    if (typeOfWorkplace) {
+      this.path.pathname += workplacePaths[typeOfWorkplace] ?? "";
+    }
   }
 
-  protected filterTechStack(): string {
+  /**
+   * Filters the tech stack and updates the criteria.
+   */
+  protected filterTechStack(): void {
     const { techStack } = this.jobQuery ?? {};
-    if (!techStack) return this.path;
-
-    const newCriteria = `requirement%3D${techStack.map(encodeURIComponent).join(",")}`;
-    this.path = this.updateCriteria(newCriteria);
-
-    return this.path;
+    if (techStack) {
+      const newCriteria = `requirement%3D${techStack
+        .map((tech) => (tech === "js" ? "javascript" : tech))
+        .map(encodeURIComponent)
+        .join(",")}`;
+      this.updateCriteria(newCriteria);
+    }
   }
 
-  protected filterPositionLevel(): string {
+  /**
+   * Filters the position level and updates the criteria.
+   */
+  protected filterPositionLevel(): void {
     const { positionLevel } = this.jobQuery ?? {};
-    if (!positionLevel) return this.path;
+    if (positionLevel) {
+      const seniorityConfig = {
+        junior: ["junior", "trainee"],
+        mid: ["mid"],
+        senior: ["senior"],
+        leader: ["expert"],
+        manager: ["expert"],
+      };
 
-    const seniorityConfig = {
-      junior: ["junior", "trainee"],
-      mid: ["mid"],
-      senior: ["senior"],
-      leader: ["expert"],
-      manager: ["expert"],
-    };
-
-    const seniorities = seniorityConfig[positionLevel] || [positionLevel];
-    const newCriteria = `seniority%3D${seniorities.map(encodeURIComponent).join(",")}`;
-    this.path = this.updateCriteria(newCriteria);
-
-    return this.path;
+      const seniorities = seniorityConfig[positionLevel] || [positionLevel];
+      const newCriteria = `seniority%3D${seniorities.map(encodeURIComponent).join(",")}`;
+      this.updateCriteria(newCriteria);
+    }
   }
 
-  protected filterContent(): string {
-    const { content } = this.jobQuery ?? {};
-    if (!content) return this.path;
-
-    const newCriteria = `content%3D${encodeURIComponent(content)}`;
-    this.path = this.updateCriteria(newCriteria);
-
-    return this.path;
-  }
-
-  protected filterSalary(): string {
+  /**
+   * Filters the salary range and updates the criteria.
+   */
+  protected filterSalary(): void {
     const { minimumSalary, maximumSalary } = this.jobQuery ?? {};
     const criteria: string[] = [];
 
-    if (minimumSalary !== undefined)
+    if (minimumSalary !== undefined) {
       criteria.push(`salary%3Epln${minimumSalary}m`);
+    }
 
-    if (maximumSalary !== undefined)
+    if (maximumSalary !== undefined) {
       criteria.push(`salary%3Cpln${maximumSalary}m`);
+    }
 
-    const newCriteria = criteria.join(" ");
-    this.path = this.updateCriteria(newCriteria);
-
-    return this.path;
+    if (criteria.length > 0) {
+      const newCriteria = criteria.join(" ");
+      this.updateCriteria(newCriteria);
+    }
   }
 
-  private updateCriteria(newCriteria: string): string {
-    const basePath = this.path.split("?")[0];
-    const existingCriteria = new URLSearchParams(this.path.split("?")[1]);
+  /**
+   * Filters the content and updates the criteria.
+   */
+  protected filterContent(): void {
+    this.filterCriteria("content", this.jobQuery?.content);
+  }
 
-    const criteria = existingCriteria.get("criteria");
-    const updatedCriteria = criteria
-      ? `${criteria}%20${newCriteria}`
-      : newCriteria;
-
-    existingCriteria.set("criteria", updatedCriteria);
-    return `${basePath}?${existingCriteria.toString()}`;
+  /**
+   * Filters the category and updates the criteria.
+   */
+  protected filterCategory(): void {
+    this.filterCriteria("category", this.jobQuery?.category);
   }
 }
 
