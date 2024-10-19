@@ -21,16 +21,14 @@ export class JobSearcher extends AbstractJobSearcher {
 
     // path = this.filterJobType(path, jobType);
     this.path = this.filterPositionLevel();
-    // this.path = this.filterSalary();
-    // path = this.filterContent(path, content);
+    this.path = this.filterSalary();
+    this.path = this.filterContent();
 
     await page.goto(this.path);
   }
   protected filterLocation(): string {
-    if (!this.jobQuery) return this.path;
-    const { location } = this.jobQuery;
-    const basePath = (this.path += location);
-    return basePath;
+    const { location } = this.jobQuery ?? {};
+    return (this.path += location ? `/${location}` : "");
   }
 
   protected filterTypeOfWorkplace(): string {
@@ -58,12 +56,8 @@ export class JobSearcher extends AbstractJobSearcher {
   }
 
   protected filterPositionLevel(): string {
-    // Check if positionLevel is defined in jobQuery
     const { positionLevel } = this.jobQuery ?? {};
     if (!positionLevel) return this.path;
-
-    let basePath = this.path.split("?")[0];
-    const existingCriteria = new URLSearchParams(this.path.split("?")[1]);
 
     const seniorityConfig = {
       junior: ["junior", "trainee"],
@@ -75,29 +69,19 @@ export class JobSearcher extends AbstractJobSearcher {
 
     const seniorities = seniorityConfig[positionLevel] || [positionLevel];
     const newCriteria = `seniority%3D${seniorities.map(encodeURIComponent).join(",")}`;
-    const criteria = existingCriteria.get("criteria");
-    const updatedCriteria = criteria
-      ? `${criteria}%20${newCriteria}`
-      : newCriteria;
-
-    existingCriteria.set("criteria", updatedCriteria);
-    this.path = `${basePath}?${existingCriteria.toString()}`;
+    this.path = this.updateCriteria(newCriteria);
 
     return this.path;
   }
 
-  protected filterContent(path: string, content: string | undefined): string {
-    const basePath = path.split("?")[0];
+  protected filterContent(): string {
+    const basePath = this.path.split("?")[0];
     const criteria = `criteria=requirement%3D${content}`;
     return `${basePath}?${criteria}`;
   }
 
-  protected filterSalary(
-    path: string,
-    minimumSalary: number | undefined,
-    maximumSalary: number | undefined
-  ): string {
-    const basePath = path.split("?")[0];
+  protected filterSalary(): string {
+    const { minimumSalary, maximumSalary } = this.jobQuery ?? {};
     const criteria: string[] = [];
 
     if (minimumSalary !== undefined)
@@ -106,9 +90,10 @@ export class JobSearcher extends AbstractJobSearcher {
     if (maximumSalary !== undefined)
       criteria.push(`salary%3Cpln${maximumSalary}m`);
 
-    const criteriaString =
-      criteria.length > 0 ? `criteria=${criteria.join(" ")}` : "";
-    return `${basePath}?${criteriaString}`;
+    const newCriteria = criteria.join(" ");
+    this.path = this.updateCriteria(newCriteria);
+
+    return this.path;
   }
 
   // protected filterJobType(path: string, jobType: string[] | undefined): string {
