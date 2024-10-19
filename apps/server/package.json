@@ -4,8 +4,10 @@
   "private": true,
   "main": "index.ts",
   "scripts": {
+    "rm -rf dist": "rm -rf dist",
     "start": "nodemon --turbo",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "devdebug": "nodemon --config nodemon.json --inspect src/index.ts"
   },
   "keywords": [],
   "author": "",
