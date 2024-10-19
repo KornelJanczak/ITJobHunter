@@ -1,88 +1,87 @@
+import { JobQuery } from "@repo/interfaces/job";
 import { type SearchJobOffers } from "../../interfaces";
 import { AbstractJobSearcher } from "../abstract/abstractJobSearcher";
 
 export class JobSearcher extends AbstractJobSearcher {
+  private jobQuery: JobQuery | null = null;
+  private path: string = "";
+
   async searchJobOffers({
     page,
     jobQuery,
     path,
     next,
   }: SearchJobOffers): Promise<void> {
-    const {
-      content,
-      techStack,
-      positionLevel,
-      minimumSalary,
-      maximumSalary,
-      jobType,
-      location,
-    } = jobQuery;
+    this.jobQuery = jobQuery;
+    this.path = path;
 
-    path = this.filterLocation(path, location);
-    path = this.filterJobType(path, jobType);
-    console.log("filter job type", path);
+    this.path = this.filterLocation();
+    this.path = this.filterTypeOfWorkplace();
+    this.path = this.filterTechStack();
 
-    path = this.filterTechStack(path, techStack);
-    path = this.filterPositionLevel(path, positionLevel);
-    path = this.filterSalary(path, minimumSalary, maximumSalary);
+    // path = this.filterJobType(path, jobType);
+    this.path = this.filterPositionLevel();
+    // this.path = this.filterSalary();
     // path = this.filterContent(path, content);
 
-    console.log("AFTER job searcher", path);
-
-    await page.goto(path);
+    await page.goto(this.path);
   }
 
-  protected filterLocation(path: string, location: string | undefined): string {
-    return (path += `/${location}`);
+  protected filterLocation(): string {
+    if (!this.jobQuery) return this.path;
+    const { location } = this.jobQuery;
+    const basePath = (this.path += location);
+    return basePath;
   }
 
-  protected filterTechStack(
-    path: string,
-    techStack: string[] | undefined
-  ): string {
-    if (!techStack) return path;
+  protected filterTechStack(): string {
+    if (!this.jobQuery) return this.path;
+    const { techStack } = this.jobQuery;
+
+    if (!techStack) return this.path;
 
     switch (techStack.length) {
       case 1:
-        path += `/${techStack[0]}`;
+        this.path += `/${techStack[0]}`;
         break;
       default:
         console.log(techStack);
-        const basePath = path.split("?")[0];
+        const basePath = this.path.split("?")[0];
         const criteria = `criteria=requirement%3D${techStack.map(encodeURIComponent).join(",")}`;
-        path = `${basePath}?${criteria}`;
+        this.path = `${basePath}?${criteria}`;
         break;
     }
 
-    return path;
+    return this.path;
   }
 
-  protected filterPositionLevel(
-    path: string,
-    positionLevel: string | undefined
-  ): string {
-    let criteria: string = "";
-    let basePath = path.split("?")[0];
+  protected filterPositionLevel(): string {
+    // Check if positionLevel is defined in jobQuery
+    const { positionLevel } = this.jobQuery ?? {};
+    if (!positionLevel) return this.path;
 
-    switch (positionLevel) {
-      case "junior":
-        const seniorities = ["junior", "trainee"];
-        criteria = `criteria=seniority%3D${seniorities.map(encodeURIComponent).join(",")}`;
-        path = `${basePath}?${criteria}`;
-        console.log("junior", path);
+    let basePath = this.path.split("?")[0];
+    const existingCriteria = new URLSearchParams(this.path.split("?")[1]);
 
-        break;
-      default:
-        if (positionLevel) {
-          criteria = `criteria=seniority%3D${encodeURIComponent(positionLevel)}`;
-          path = `${basePath}?${criteria}`;
-        }
-        break;
-    }
+    const seniorityConfig = {
+      junior: ["junior", "trainee"],
+      mid: ["mid"],
+      senior: ["senior"],
+      leader: ["expert"],
+      manager: ["expert"],
+    };
 
-    console.log("path", path);
+    const seniorities = seniorityConfig[positionLevel] || [positionLevel];
+    const newCriteria = `seniority%3D${seniorities.map(encodeURIComponent).join(",")}`;
+    const criteria = existingCriteria.get("criteria");
+    const updatedCriteria = criteria
+      ? `${criteria}%20${newCriteria}`
+      : newCriteria;
 
-    return path;
+    existingCriteria.set("criteria", updatedCriteria);
+    this.path = `${basePath}?${existingCriteria.toString()}`;
+
+    return this.path;
   }
 
   protected filterContent(path: string, content: string | undefined): string {
@@ -110,14 +109,28 @@ export class JobSearcher extends AbstractJobSearcher {
     return `${basePath}?${criteriaString}`;
   }
 
-  protected filterJobType(path: string, jobType: string[] | undefined): string {
-    if (!jobType) return path;
-    if (jobType.length === 1) return (path += `/${jobType[0]}`);
+  // protected filterJobType(path: string, jobType: string[] | undefined): string {
+  //   if (!jobType) return path;
+  //   if (jobType.length === 1) return (path += `/${jobType[0]}`);
 
-    const basePath = path.split("?")[0];
-    const criteria = `%3D${jobType.map(encodeURIComponent).join(",")}`;
+  //   const basePath = path.split("?")[0];
+  //   const criteria = `%3D${jobType.map(encodeURIComponent).join(",")}`;
 
-    return `${basePath}?${criteria}`;
+  //   return `${basePath}?${criteria}`;
+  // }
+
+  protected filterTypeOfWorkplace(): string {
+    const { typeOfWorkplace, location } = this.jobQuery ?? {};
+
+    const workplacePaths: { [key: string]: string } = {
+      remote: location ? "" : "/praca-zdalna",
+      hybrid: "/hybrid",
+      onSite: "/fieldWork",
+    };
+
+    return (this.path += typeOfWorkplace
+      ? (workplacePaths[typeOfWorkplace] ?? this.path)
+      : "");
   }
 }
 
