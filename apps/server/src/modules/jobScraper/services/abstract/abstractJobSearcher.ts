@@ -1,5 +1,4 @@
 import { type SearchJobOffers } from "../../interfaces";
-import { type Page } from "puppeteer";
 
 export abstract class AbstractJobSearcher {
   abstract searchJobOffers({
@@ -12,30 +11,25 @@ export abstract class AbstractJobSearcher {
   protected abstract filterLocation(
     path: string,
     location: string | undefined
-  ): string;
+  ): string | void;
   protected abstract filterTechStack(
     path: string,
     techStack: string[] | undefined
-  ): string;
+  ): string | void;
 
   protected abstract filterContent(
     path: string,
     content: string | undefined
-  ): string;
+  ): string | void;
 
   protected abstract filterPositionLevel(
     path: string,
     positionLevel: string | undefined
-  ): string;
+  ): string | void;
 
   protected abstract filterSalary(
     path: string,
     minimumSalary: number | undefined,
     maximumSalary: number | undefined
-  ): string;
-
-  // protected abstract filterJobType(
-  //   path: string,
-  //   jobType: string[] | undefined
-  // ): string;
+  ): string | void;
 }
