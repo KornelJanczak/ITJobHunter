@@ -5,17 +5,12 @@ import BadRequestError from "../../../../errors/badRequestError";
 export default abstract class AbstractScraperService {
   protected browser: Browser | null = null;
 
-  constructor() {
-    // this.initBrowser();
-  }
-
   async initBrowser() {
     if (!this.browser) {
       this.browser = await puppeteer.launch({
         headless: false,
         defaultViewport: null,
       });
-      console.log("Browser initialized");
     }
   }
 
@@ -24,6 +19,10 @@ export default abstract class AbstractScraperService {
       await this.browser.close();
       this.browser = null;
     }
+  }
+
+  async waitFor(time: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, time));
   }
 
   protected abstract executeScrape(
@@ -45,6 +44,9 @@ export default abstract class AbstractScraperService {
 
     try {
       const result = await this.executeScrape(page, options);
+      await this.waitFor(100);
+      await this.closeBrowser();
+
       return result;
     } catch (err) {
       throw new BadRequestError({
