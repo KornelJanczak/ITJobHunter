@@ -3,11 +3,15 @@ import { type JustJoinITOffer, type SearchJobOffers } from "../../interfaces";
 import BadRequestError from "../../../../errors/badRequestError";
 import { AbstractJobSearcher } from "../abstract/abstractJobSearcher";
 import { Page } from "puppeteer";
+import { JobQuery } from "@repo/interfaces/job";
 
 class JobSearcher
   extends AbstractJobSearcher
   implements IJobSearcher<JobOffer>
 {
+  private path = "https://justjoin.it/";
+  private jobQuery: JobQuery | null = null;
+
   async searchJobOffers({
     page,
     jobQuery,
@@ -24,14 +28,15 @@ class JobSearcher
       location,
     } = jobQuery;
 
-    path = this.filterLocation(path, location);
-    path = this.filterTechStack(path, techStack);
-    path = this.filterContent(path, content);
-    path = this.filterPositionLevel(path, positionLevel);
+    this.jobQuery = jobQuery;
+    this.path = path;
+
+    this.filterLocation();
+    this.filterTechStack();
+    this.filterContent();
+    this.filterPositionLevel();
     path = this.filterSalary(path, minimumSalary, maximumSalary);
     path = this.filterJobType(path, jobType);
-
-    console.log("AFTER job searcher");
 
     try {
       console.log(page);
@@ -49,43 +54,37 @@ class JobSearcher
     }
   }
 
-  protected filterLocation(path: string, location: string | undefined): string {
-    if (location) {
-      path += `/${location}`;
-    } else {
-      path += "/all-locations";
-    }
-    return path;
+  private updateCriteria(newCriteria: string): void {
+    // Future potential error reason
+    this.path += `/${newCriteria}`;
   }
 
-  protected filterTechStack(
-    path: string,
-    techStack: string[] | undefined
-  ): string {
-    if (techStack) {
-      const javaScriptIsThere = techStack.find((tech) => tech === "js");
-      if (javaScriptIsThere) path += "/javascript";
-    }
-
-    console.log("TECH STACK", path);
-
-    return path;
+  protected filterLocation(): void {
+    const defaultLocation = "all-locations";
+    const { location = defaultLocation } = this.jobQuery ?? {
+      location: defaultLocation,
+    };
+    this.updateCriteria(location);
   }
 
-  protected filterContent(path: string, content: string | undefined): string {
-    if (content) path += `?keyword=${content}`;
-    return path;
+  protected filterTechStack(): void {
+    const { techStack } = this.jobQuery ?? { techStack: undefined };
+    if (!techStack) return;
+
+    const javaScriptExist = techStack.find((tech) => tech === "js");
+    if (javaScriptExist) this.updateCriteria("javascript");
+
+    this.updateCriteria(techStack[0]);
   }
 
-  protected filterPositionLevel(
-    path: string,
-    positionLevel: string | undefined
-  ): string {
-    if (positionLevel) path += `/experience-level_${positionLevel}`;
+  protected filterContent(): void {
+    const { content } = this.jobQuery ?? { content: undefined };
+    if (content) this.updateCriteria(`?keyword=${content}`);
+  }
 
-    console.log("Position LEVEL", positionLevel);
-
-    return path;
+  protected filterPositionLevel(): void {
+    const { positionLevel } = this.jobQuery ?? { positionLevel: undefined };
+    if (positionLevel) this.updateCriteria(positionLevel);
   }
 
   protected filterSalary(
