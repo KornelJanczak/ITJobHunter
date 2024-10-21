@@ -35,7 +35,7 @@ class NoFluffJobsScraperService<T extends JobOffer>
       next,
     });
 
-    return [];
+    return await this.dataCollector.scrollAndCollectData(page);
   }
 }
 
