@@ -10,8 +10,8 @@ export class JobSearcher
   extends AbstractJobSearcher
   implements IJobSearcher<JobOffer>
 {
-  private jobQuery: JobQuery | null = null;
   private path: URL = new URL("https://nofluffjobs.com/pl");
+  private jobQuery: JobQuery | null = null;
 
   async searchJobOffers({
     page,
@@ -21,7 +21,6 @@ export class JobSearcher
   }: SearchJobOffers): Promise<void> {
     this.jobQuery = jobQuery;
     this.path = new URL(path);
-
     this.filterJobOffers();
 
     try {
