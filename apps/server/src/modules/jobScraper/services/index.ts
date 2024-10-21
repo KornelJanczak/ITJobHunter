@@ -10,8 +10,8 @@ interface IJobScraperService {
 
 class JobScraperService implements IJobScraperService {
   urls = {
-    justJoinIT: "https://justjoin.it/",
-    noFluffJobs: "https://nofluffjobs.com/pl/",
+    justJoinIT: "https://justjoin.it",
+    noFluffJobs: "https://nofluffjobs.com/pl",
     protocolIT: "https://theprotocol.it/",
     pracujPL: "https://www.pracuj.pl/",
   };
