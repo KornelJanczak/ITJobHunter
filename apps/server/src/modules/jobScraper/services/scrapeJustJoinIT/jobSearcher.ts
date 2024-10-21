@@ -1,15 +1,13 @@
 import { JobOffer, type IJobSearcher } from "../../interfaces";
-import { type JustJoinITOffer, type SearchJobOffers } from "../../interfaces";
-import BadRequestError from "../../../../errors/badRequestError";
+import { type SearchJobOffers } from "../../interfaces";
 import { AbstractJobSearcher } from "../abstract/abstractJobSearcher";
-import { Page } from "puppeteer";
 import { JobQuery } from "@repo/interfaces/job";
 
 class JobSearcher
   extends AbstractJobSearcher
   implements IJobSearcher<JobOffer>
 {
-  private path = "https://justjoin.it/";
+  private path = "";
   private jobQuery: JobQuery | null = null;
 
   async searchJobOffers({
@@ -18,44 +16,27 @@ class JobSearcher
     path,
     next,
   }: SearchJobOffers): Promise<void> {
-    const {
-      content,
-      techStack,
-      positionLevel,
-      minimumSalary,
-      maximumSalary,
-      jobType,
-      location,
-    } = jobQuery;
-
     this.jobQuery = jobQuery;
     this.path = path;
+    this.filterJobOffers();
 
+    try {
+      await page.goto(this.path);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  protected filterJobOffers(): void {
     this.filterLocation();
     this.filterTechStack();
     this.filterContent();
     this.filterPositionLevel();
-    path = this.filterSalary(path, minimumSalary, maximumSalary);
-    path = this.filterJobType(path, jobType);
-
-    try {
-      console.log(page);
-
-      await page.goto(path);
-    } catch (err) {
-      next(
-        new BadRequestError({
-          code: 400,
-          logging: true,
-          message: "Failed to search for job offers by job query content",
-          context: { error: err },
-        })
-      );
-    }
+    this.filterSalary();
+    this.filterJobType();
   }
 
   private updateCriteria(newCriteria: string): void {
-    // Future potential error reason
     this.path += `/${newCriteria}`;
   }
 
@@ -65,6 +46,7 @@ class JobSearcher
       location: defaultLocation,
     };
     this.updateCriteria(location);
+    console.log(this.path);
   }
 
   protected filterTechStack(): void {
@@ -73,47 +55,69 @@ class JobSearcher
 
     const javaScriptExist = techStack.find((tech) => tech === "js");
     if (javaScriptExist) this.updateCriteria("javascript");
+    else this.updateCriteria(techStack[0]);
 
-    this.updateCriteria(techStack[0]);
+    console.log(this.path);
   }
 
   protected filterContent(): void {
     const { content } = this.jobQuery ?? { content: undefined };
     if (content) this.updateCriteria(`?keyword=${content}`);
+    console.log(this.path);
   }
 
   protected filterPositionLevel(): void {
     const { positionLevel } = this.jobQuery ?? { positionLevel: undefined };
-    if (positionLevel) this.updateCriteria(positionLevel);
+
+    const positionLevelConfig: { [key: string]: string } = {
+      junior: "junior",
+      senior: "senior",
+      mid: "mid",
+      leader: "c-level",
+      manager: "c-level",
+    };
+
+    if (positionLevel)
+      this.updateCriteria(
+        `?experience-level=${positionLevelConfig[positionLevel]}`
+      );
   }
 
-  protected filterSalary(
-    path: string,
-    minimumSalary: number | undefined,
-    maximumSalary: number | undefined
-  ): string {
-    if (minimumSalary) path += `/salary_${minimumSalary}.10000`;
-    if (maximumSalary) path += `/salary_0.${maximumSalary}`;
+  protected filterSalary(): void {
+    const { minimumSalary, maximumSalary } = this.jobQuery ?? {};
+
+    if (minimumSalary) this.updateCriteria(`salary_0.${minimumSalary}`);
+    if (maximumSalary) this.updateCriteria(`salary_0.${maximumSalary}`);
+
     if (minimumSalary && maximumSalary)
-      path += `/salary_${minimumSalary}.${maximumSalary}`;
-    return path;
+      this.updateCriteria(`salary_${minimumSalary}.${maximumSalary}`);
   }
 
-  protected filterJobType(path: string, jobType: string[] | undefined): string {
-    if (jobType) {
-      const formattedJobs = jobType.map((job) => {
-        if (job === "fullTime") return "full-time";
-        if (job === "partTime") return "part-time";
-        return job;
-      });
-      const isRemote = formattedJobs.find((job) => job === "remote");
-      if (isRemote) {
-        path += `/working-hours_${formattedJobs.join(".")}/remote_yes`;
-      } else {
-        path += `/working-hours_${formattedJobs.join(".")}`;
-      }
+  protected filterJobType(): void {
+    const { jobType, typeOfWorkplace } = this.jobQuery ?? {
+      jobType: undefined,
+    };
+    if (!jobType) return;
+
+    const formattedJobs = jobType.map((job) => {
+      const jobsTypeConfig: { [key: string]: string } = {
+        fullTime: "full-time",
+        partTime: "part-time",
+      };
+      return jobsTypeConfig[job];
+    });
+
+    const isRemote = typeOfWorkplace === "remote";
+
+    if (isRemote) {
+      this.updateCriteria(
+        `working-hours_${formattedJobs.join(".")}/remote_yes`
+      );
+    } else {
+      this.updateCriteria(`working-hours_${formattedJobs.join(".")}`);
     }
-    return path;
+
+    console.log(this.path);
   }
 }
 
