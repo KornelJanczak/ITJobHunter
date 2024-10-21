@@ -35,8 +35,7 @@ class ScrapeJustJoinIT<T extends JustJoinITOffer>
       next,
     });
 
-    const jobs = await this.dataCollector.scrollAndCollectData(page);
-    return jobs;
+    return await this.dataCollector.scrollAndCollectData(page);
   }
 }
 
