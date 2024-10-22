@@ -1,9 +1,8 @@
-import { JobQuery } from "@repo/interfaces/job";
-import { NextFunction } from "express";
-import { Page } from "puppeteer";
+import { type JobQuery } from "@repo/interfaces/job";
+import { type NextFunction } from "express";
+import { type Page, type ElementHandle } from "puppeteer";
 
 export interface ScrapeOptions {
-  url: string;
   jobQuery: JobQuery;
   next: NextFunction;
 }
@@ -37,15 +36,15 @@ export interface IJobScraperService<T> {
 }
 
 export interface IDataCollector<T> {
-  collectData(page: Page): Promise<T[]>;
-  scrollAndCollectData(page: Page): Promise<T[]>;
+  extractDataFromElement(element: ElementHandle<Element>): Promise<T>;
+  scrollAndCollectData(): Promise<T[]>;
 }
 
-export interface IJobSearcher<T> {
-  searchJobOffers(options: SearchJobOffers): Promise<void>;
+export interface IJobSearcher {
+  searchJobOffers(): Promise<void>;
 }
 
 export interface IScraperServiceDependencies<T> {
-  jobSearcher: IJobSearcher<T>;
+  jobSearcher: IJobSearcher;
   dataCollector: IDataCollector<T>;
 }
