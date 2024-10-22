@@ -1,32 +1,17 @@
 import { type JobQuery } from "@repo/interfaces/job";
-import {
-  type SearchJobOffers,
-  type IJobSearcher,
-  type JobOffer,
-} from "../../interfaces";
+import { type SearchJobOffers, type IJobSearcher } from "../../interfaces";
 import { AbstractJobSearcher } from "../abstract/abstractJobSearcher";
 
-export class JobSearcher
-  extends AbstractJobSearcher
-  implements IJobSearcher<JobOffer>
-{
+export class JobSearcher extends AbstractJobSearcher implements IJobSearcher {
   private path: URL = new URL("https://nofluffjobs.com/pl");
-  private jobQuery: JobQuery | null = null;
 
-  async searchJobOffers({
-    page,
-    jobQuery,
-    path,
-    next,
-  }: SearchJobOffers): Promise<void> {
-    this.jobQuery = jobQuery;
-    this.path = new URL(path);
+  async searchJobOffers(): Promise<void> {
     this.filterJobOffers();
 
     try {
-      await page.goto(this.path.toString());
+      await this.page.goto(this.path.toString());
     } catch (err) {
-      next(err);
+      this.next(err);
     }
   }
 
@@ -161,4 +146,4 @@ export class JobSearcher
   }
 }
 
-export const jobSearcher = new JobSearcher();
+export default JobSearcher;
