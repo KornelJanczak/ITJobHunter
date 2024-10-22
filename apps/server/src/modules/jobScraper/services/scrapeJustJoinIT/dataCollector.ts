@@ -1,11 +1,18 @@
 import { type Page } from "puppeteer";
-import { type IDataCollector, type JustJoinITOffer } from "../../interfaces";
+import {
+  IDataCollector,
+  JobOffer,
+  type JustJoinITOffer,
+} from "../../interfaces";
 import BadRequestError from "../../../../errors/badRequestError";
 import { autoScroll } from "../../helpers/autoScroll";
 import { AbstractDataCollector } from "../abstract/abstractDataCollector";
 
-class DataCollector extends AbstractDataCollector<JustJoinITOffer> {
-  async collectData(page: Page): Promise<JustJoinITOffer[]> {
+class DataCollector
+  extends AbstractDataCollector<JobOffer>
+  implements IDataCollector<JobOffer>
+{
+  async collectData(page: Page): Promise<JobOffer[]> {
     const elements = await page.$$(".MuiBox-root.css-ai36e1");
     const jobOffers: JustJoinITOffer[] = [];
 
