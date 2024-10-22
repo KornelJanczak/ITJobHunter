@@ -1,9 +1,27 @@
 import puppeteer, { type Browser, type Page } from "puppeteer";
-import { type ScrapeOptions } from "../../interfaces";
+import {
+  IDataCollector,
+  IJobSearcher,
+  type ScrapeOptions,
+} from "../../interfaces";
 import BadRequestError from "../../../../errors/badRequestError";
 
-export default abstract class AbstractScraperService {
+export default abstract class AbstractScraperService<T> {
   protected browser: Browser | null = null;
+  protected page: Page | null = null;
+  protected options: ScrapeOptions;
+  protected jobSearcher: IJobSearcher;
+  protected dataCollector: IDataCollector<T>;
+
+  constructor(
+    options: ScrapeOptions,
+    jobSearcher: IJobSearcher,
+    dataCollector: IDataCollector<T>
+  ) {
+    this.options = options;
+    this.jobSearcher = jobSearcher;
+    this.dataCollector = dataCollector;
+  }
 
   async initBrowser() {
     if (!this.browser) {
@@ -25,12 +43,7 @@ export default abstract class AbstractScraperService {
     return new Promise((resolve) => setTimeout(resolve, time));
   }
 
-  protected abstract executeScrape(
-    page: Page,
-    options: ScrapeOptions
-  ): Promise<any>;
-
-  async scrape(options: ScrapeOptions): Promise<any> {
+  async scrape(): Promise<any> {
     await this.initBrowser();
 
     if (!this.browser)
@@ -40,10 +53,10 @@ export default abstract class AbstractScraperService {
         code: 400,
       });
 
-    const page = await this.browser.newPage();
+    this.page = await this.browser.newPage();
 
     try {
-      const result = await this.executeScrape(page, options);
+      const result = await this.executeScrape();
       await this.waitFor(100);
       await this.closeBrowser();
 
@@ -56,5 +69,10 @@ export default abstract class AbstractScraperService {
         context: { error: err },
       });
     }
+  }
+
+  private async executeScrape(): Promise<T[]> {
+    await this.jobSearcher.searchJobOffers();
+    return await this.dataCollector.scrollAndCollectData();
   }
 }
