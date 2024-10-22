@@ -7,39 +7,37 @@ import {
   JobOffer,
   ScrapeOptions,
 } from "../../interfaces";
-
-import { jobSearcher } from "./jobSearcher";
-import { dataCollector } from "./dataCollector";
+import JobSearcher from "./jobSearcher";
 import AbstractScraperService from "../abstract/abstractScraperService";
+import DataCollector from "./dataCollector";
 
 class NoFluffJobsScraperService<T extends JobOffer>
-  extends AbstractScraperService
-  implements IJobScraperService<T>
-{
-  private jobSearcher: IJobSearcher<T>;
-  private dataCollector: IDataCollector<T>;
-
-  constructor(config: IScraperServiceDependencies<T>) {
-    super();
-    this.jobSearcher = config.jobSearcher;
-    this.dataCollector = config.dataCollector;
-  }
-  protected async executeScrape(
-    page: Page,
-    { url, jobQuery, next }: ScrapeOptions
-  ): Promise<any> {
-    await this.jobSearcher.searchJobOffers({
-      page,
-      jobQuery,
-      path: url,
-      next,
-    });
-
-    return await this.dataCollector.scrollAndCollectData(page);
-  }
+  extends AbstractScraperService<T>
+  implements IJobScraperService<T> {
+  // private jobSearcher: IJobSearcher;
+  // private dataCollector: IDataCollector<T>;
+  // constructor(
+  //   config: IScraperServiceDependencies<T>,
+  //   page: Page,
+  //   options: ScrapeOptions
+  // ) {
+  //   super(page, options);
+  //   this.jobSearcher = config.jobSearcher;
+  //   this.dataCollector = config.dataCollector;
+  // }
+  // protected async executeScrape(): Promise<any> {
+  //   // await this.jobSearcher.searchJobOffers({
+  //   //   page,
+  //   //   jobQuery,
+  //   //   next,
+  //   // });
+  //   // return await this.dataCollector.scrollAndCollectData(page);
+  // }
 }
 
-export const scrapeNoFluffJobs = new NoFluffJobsScraperService({
-  jobSearcher,
-  dataCollector,
-});
+export default NoFluffJobsScraperService;
+
+// export const scrapeNoFluffJobs = new NoFluffJobsScraperService({
+//   jobSearcher,
+//   dataCollector,
+// });
