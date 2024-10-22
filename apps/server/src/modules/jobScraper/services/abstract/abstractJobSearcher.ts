@@ -1,12 +1,19 @@
+import { JobQuery } from "@repo/interfaces/job";
 import { type SearchJobOffers } from "../../interfaces";
+import { type Page } from "puppeteer";
+import { NextFunction } from "express";
 
 export abstract class AbstractJobSearcher {
-  abstract searchJobOffers({
-    page,
-    jobQuery,
-    path,
-    next,
-  }: SearchJobOffers): Promise<void>;
+  protected page: Page;
+  protected jobQuery: JobQuery;
+  protected next: NextFunction;
+
+  constructor(page: Page, jobQuery: JobQuery, next: NextFunction) {
+    this.page = page;
+    this.jobQuery = jobQuery;
+    this.next = next;
+  }
+  abstract searchJobOffers(): Promise<void>;
 
   protected abstract filterLocation(
     path: string,
