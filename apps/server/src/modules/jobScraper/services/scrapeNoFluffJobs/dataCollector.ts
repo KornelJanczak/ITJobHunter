@@ -6,6 +6,8 @@ class DataCollector
   extends AbstractDataCollector<JobOffer>
   implements IDataCollector<JobOffer>
 {
+
+
   mapData(jobOffers: JobOffer[]): JobOffer[] {
     return jobOffers.map(
       (job) => (job = { ...job, url: `${this.pageUrl}${job.url}` })
