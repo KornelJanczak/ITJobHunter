@@ -1,5 +1,5 @@
 import { JobQuery } from "@repo/interfaces/job";
-import { type SearchJobOffers } from "../../interfaces";
+import { ScrapeOptions, type SearchJobOffers } from "../../interfaces";
 import { type Page } from "puppeteer";
 import { NextFunction } from "express";
 
@@ -8,7 +8,7 @@ export abstract class AbstractJobSearcher {
   protected jobQuery: JobQuery;
   protected next: NextFunction;
 
-  constructor(page: Page, jobQuery: JobQuery, next: NextFunction) {
+  constructor(page: Page, { jobQuery, next }: ScrapeOptions) {
     this.page = page;
     this.jobQuery = jobQuery;
     this.next = next;
