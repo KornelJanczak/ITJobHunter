@@ -13,7 +13,19 @@ import DataCollector from "./dataCollector";
 
 class NoFluffJobsScraperService<T extends JobOffer>
   extends AbstractScraperService<T>
-  implements IJobScraperService<T> {
+  implements IJobScraperService<T>
+{
+  private url: string = "https://nofluffjobs.com/pl/";
+
+  async executeScrape(): Promise<T[]> {
+    const jobSearcher = new JobSearcher(this.page, this.options);
+    const dataCollector = new DataCollector(this.page, "", this.url);
+
+    await jobSearcher.searchJobOffers();
+    const collectedData = await dataCollector.scrollAndCollectData();
+
+    // return collectedData;
+  }
   // private jobSearcher: IJobSearcher;
   // private dataCollector: IDataCollector<T>;
   // constructor(
