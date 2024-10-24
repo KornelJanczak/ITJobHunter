@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import jobScraperService from "../services";
+import MultiSiteScraperService from "../services";
 import { JobQuery } from "@repo/interfaces/job";
 
 export const jobScraperController = async (
@@ -8,10 +8,9 @@ export const jobScraperController = async (
   next: NextFunction
 ) => {
   try {
-    // debugger;
-    console.log("Job Scraper Controller");
     const jobQuery: Partial<JobQuery> = req.jobQuery || {};
-    const jobs = await jobScraperService.scrapeJobs(jobQuery, next);
+    const jobScraperService = new MultiSiteScraperService({ jobQuery, next });
+    const jobs = await jobScraperService.executeScrapers();
 
     return res.status(200).json({ jobs });
   } catch (err) {
