@@ -1,5 +1,5 @@
 import { JobQuery } from "@repo/interfaces/job";
-import { ScrapeOptions, type SearchJobOffers } from "../../interfaces";
+import { ScrapeOptions } from "../../interfaces";
 import { type Page } from "puppeteer";
 import { NextFunction } from "express";
 
