@@ -1,5 +1,4 @@
-import { type JobQuery } from "@repo/interfaces/job";
-import { type SearchJobOffers, type IJobSearcher } from "../../interfaces";
+import { type IJobSearcher } from "../../interfaces";
 import { AbstractJobSearcher } from "../abstract/abstractJobSearcher";
 
 export class JobSearcher extends AbstractJobSearcher implements IJobSearcher {
