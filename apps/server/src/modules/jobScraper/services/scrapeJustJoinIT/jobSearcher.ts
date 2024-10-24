@@ -5,7 +5,7 @@ import { JobQuery } from "@repo/interfaces/job";
 
 class JobSearcher
   extends AbstractJobSearcher
-  implements IJobSearcher<JobOffer>
+  implements IJobSearcher
 {
   private path = "";
   private jobQuery: JobQuery | null = null;
@@ -121,4 +121,4 @@ class JobSearcher
   }
 }
 
-export const jobSearcher = new JobSearcher();
+export default JobSearcher;
