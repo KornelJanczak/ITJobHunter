@@ -1,19 +1,24 @@
-import { JobQuery } from "@repo/interfaces/job";
-import { ScrapeOptions } from "../interfaces";
-import puppeteer from "puppeteer";
-import { NextFunction } from "express";
+import { IJobScraperService, JobOffer, ScrapeOptions } from "../interfaces";
+import puppeteer, { Page } from "puppeteer";
 import { Browser } from "puppeteer";
 import BadRequestError from "../../../errors/badRequestError";
 import NoFluffJobsScraperService from "./scrapeNoFluffJobs";
 
 interface IMultiScraperService {
-  scrapeJobs(options: ScrapeOptions): Promise<any>;
+  executeScrapers(options: ScrapeOptions): Promise<any>;
 }
+
+type scraperServiceDependencies = { page: Page; options: ScrapeOptions };
 
 class MultiSiteScraperService implements IMultiScraperService {
   private browser: Browser | null = null;
+  private options: ScrapeOptions;
 
-  async scrapeJobs(options: ScrapeOptions): Promise<any> {
+  constructor(options: ScrapeOptions) {
+    this.options = options;
+  }
+
+  async executeScrapers(): Promise<any> {
     await this.initBrowser();
 
     if (!this.browser)
@@ -24,39 +29,50 @@ class MultiSiteScraperService implements IMultiScraperService {
       });
 
     const page = await this.browser.newPage();
+    const scraperProps = { page, options: this.options };
 
-    const noFluffJobsScraper = new NoFluffJobsScraperService({ page, options });
+    const [noFluffJobsScraper] = this.createScraperServices(scraperProps);
+    await noFluffJobsScraper.scrape();
+
+    await this.waitFor(200);
+    await this.closeBrowser();
   }
 
-  // private async gatherJobs(scrapeOptions: ScrapeOptions) {
-  // const justJoinItJobs = await scrapeJustJoinIT.scrape({
-  //   ...scrapeOptions,
-  // });
-  // const noFluffJobs = await scrapeNoFluffJobs.scrape({
-  //   ...scrapeOptions,
-  // });
-  // const jobs = [];
-  // return jobs;
-  // }
-
-  private processScrapeJobs() {}
+  private createScraperServices(
+    scraperServiceDependencies: scraperServiceDependencies
+  ): IJobScraperService<JobOffer>[] {
+    const noFluffJobsScraper = new NoFluffJobsScraperService(
+      scraperServiceDependencies
+    );
+    // const justJoinItScraper = new JustJoinItScraperService();
+    return [noFluffJobsScraper];
+  }
 
   private async initBrowser() {
-    if (!this.browser) {
+    try {
       this.browser = await puppeteer.launch({
         headless: false,
         defaultViewport: null,
       });
+    } catch (err) {
+      this.options.next(err);
     }
   }
 
   private async closeBrowser() {
-    if (this.browser) {
+    if (!this.browser) return;
+
+    try {
       await this.browser.close();
       this.browser = null;
+    } catch (err) {
+      this.options.next(err);
     }
+  }
+
+  private waitFor(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
-const jobScraperService = new MultiSiteScraperService();
-export default jobScraperService;
+export default MultiSiteScraperService;
