@@ -17,7 +17,7 @@ class NoFluffJobsScraperService
     return collectedData;
   }
 
-  private createScraperDependencies() {
+  protected createScraperDependencies() {
     const jobSearcher = new JobSearcher(this.page, this.options);
     const dataCollector = new DataCollector(
       this.page,

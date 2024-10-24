@@ -1,29 +1,16 @@
-import { JobOffer, type IJobSearcher } from "../../interfaces";
-import { type SearchJobOffers } from "../../interfaces";
+import { type IJobSearcher } from "../../interfaces";
 import { AbstractJobSearcher } from "../abstract/abstractJobSearcher";
-import { JobQuery } from "@repo/interfaces/job";
 
-class JobSearcher
-  extends AbstractJobSearcher
-  implements IJobSearcher
-{
-  private path = "";
-  private jobQuery: JobQuery | null = null;
+class JobSearcher extends AbstractJobSearcher implements IJobSearcher {
+  private path = "https://justjoin.it/";
 
-  async searchJobOffers({
-    page,
-    jobQuery,
-    path,
-    next,
-  }: SearchJobOffers): Promise<void> {
-    this.jobQuery = jobQuery;
-    this.path = path;
+  async searchJobOffers(): Promise<void> {
     this.filterJobOffers();
 
     try {
-      await page.goto(this.path);
+      await this.page.goto(this.path);
     } catch (err) {
-      next(err);
+      this.next(err);
     }
   }
 

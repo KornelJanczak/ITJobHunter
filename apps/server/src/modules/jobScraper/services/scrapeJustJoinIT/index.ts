@@ -1,45 +1,33 @@
-import { type Page } from "puppeteer";
-import { type IDataCollector } from "../../interfaces";
-import { type IJobSearcher } from "../../interfaces";
-import {
-  IJobScraperService,
-  IScraperServiceDependencies,
-  JustJoinITOffer,
-  ScrapeOptions,
-} from "../../interfaces";
+import JobSearcher from "./jobSearcher";
+import DataCollector from "./dataCollector";
+import { IJobScraperService } from "../../interfaces";
 import AbstractScraperService from "../abstract/abstractScraperService";
-import { dataCollector } from "./dataCollector";
-import { jobSearcher } from "./jobSearcher";
+import { JobOffer } from "../../interfaces";
 
-class ScrapeJustJoinIT<T extends JustJoinITOffer>
+class ScrapeJustJoinITService
   extends AbstractScraperService
-  implements IJobScraperService<T>
+  implements IJobScraperService<JobOffer>
 {
-  private jobSearcher: IJobSearcher<T>;
-  private dataCollector: IDataCollector<T>;
+  private url: string = "https://justjoin.it/";
 
-  constructor(config: IScraperServiceDependencies<T>) {
-    super();
-    this.jobSearcher = config.jobSearcher;
-    this.dataCollector = config.dataCollector;
+  async executeScrape(): Promise<JobOffer[]> {
+    const { jobSearcher, dataCollector } = this.createScraperDependencies();
+    await jobSearcher.searchJobOffers();
+    const collectedData = await dataCollector.scrollAndCollectData();
+
+    return collectedData;
   }
 
-  protected async executeScrape(
-    page: Page,
-    { url, jobQuery, next }: ScrapeOptions
-  ): Promise<T[]> {
-    await this.jobSearcher.searchJobOffers({
-      page,
-      jobQuery,
-      path: url,
-      next,
-    });
+  protected createScraperDependencies() {
+    const jobSearcher = new JobSearcher(this.page, this.options);
+    const dataCollector = new DataCollector(
+      this.page,
+      ".posting-list-item",
+      this.url
+    );
 
-    return await this.dataCollector.scrollAndCollectData(page);
+    return { jobSearcher, dataCollector };
   }
 }
 
-export const scrapeJustJoinIT = new ScrapeJustJoinIT({
-  jobSearcher,
-  dataCollector,
-});
+export default ScrapeJustJoinITService;
