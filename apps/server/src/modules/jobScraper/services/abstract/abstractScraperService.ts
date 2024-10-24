@@ -18,6 +18,8 @@ export default abstract class AbstractScraperService {
 
   abstract executeScrape(): Promise<any>;
 
+  protected abstract createScraperDependencies(): any;
+
   async scrape(): Promise<any> {
     try {
       return await this.executeScrape();
