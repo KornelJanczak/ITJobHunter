@@ -6,14 +6,12 @@ class DataCollector
   extends AbstractDataCollector<JobOffer>
   implements IDataCollector<JobOffer>
 {
-
-
-  mapData(jobOffers: JobOffer[]): JobOffer[] {
+  protected mapData(jobOffers: JobOffer[]): JobOffer[] {
     return jobOffers.map(
       (job) => (job = { ...job, url: `${this.pageUrl}${job.url}` })
     );
   }
-  async extractDataFromElement(
+  protected async extractDataFromElement(
     element: ElementHandle<Element>
   ): Promise<JobOffer> {
     const [title, location, url] = await Promise.all([
@@ -34,4 +32,3 @@ class DataCollector
 
 export default DataCollector;
 
-// export const dataCollector = new DataCollector();
