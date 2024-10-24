@@ -1,11 +1,5 @@
-import { ElementHandle, type Page } from "puppeteer";
-import {
-  IDataCollector,
-  JobOffer,
-  type JustJoinITOffer,
-} from "../../interfaces";
-import BadRequestError from "../../../../errors/badRequestError";
-import { autoScroll } from "../../helpers/autoScroll";
+import { ElementHandle } from "puppeteer";
+import { IDataCollector, JobOffer } from "../../interfaces";
 import { AbstractDataCollector } from "../abstract/abstractDataCollector";
 
 class DataCollector
@@ -32,5 +26,3 @@ class DataCollector
 }
 
 export default DataCollector;
-
-// export const dataCollector = new DataCollector();
