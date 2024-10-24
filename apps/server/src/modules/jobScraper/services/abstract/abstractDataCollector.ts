@@ -11,9 +11,11 @@ export abstract class AbstractDataCollector<T> {
     this.elementsTag = elementsTag;
     this.pageUrl = pageUrl;
   }
-  abstract extractDataFromElement(element: ElementHandle<Element>): Promise<T>;
+  protected abstract extractDataFromElement(
+    element: ElementHandle<Element>
+  ): Promise<T>;
 
-  abstract mapData(data: T[]): T[];
+  protected abstract mapData(data: T[]): T[];
 
   async scrollAndCollectData(): Promise<T[]> {
     const allJobs = new Set<T>();
@@ -27,7 +29,9 @@ export abstract class AbstractDataCollector<T> {
 
       await this.autoScroll(this.page);
 
-      currentHeight = await this.page.evaluate(() => document.body.scrollHeight);
+      currentHeight = await this.page.evaluate(
+        () => document.body.scrollHeight
+      );
       const endOfPage = await this.page.$("footer");
 
       if (endOfPage) break;
