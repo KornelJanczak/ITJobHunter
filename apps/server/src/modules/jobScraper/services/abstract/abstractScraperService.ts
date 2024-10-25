@@ -1,26 +1,33 @@
 import { type Page } from "puppeteer";
-import { type ScrapeOptions } from "../../interfaces";
+import {
+  type ScrapeOptions,
+  IDataCollector,
+  IJobSearcher,
+} from "../../interfaces";
 import BadRequestError from "../../../../errors/badRequestError";
 
-interface IScraperServiceDependencies {
+interface IScraperServiceDependencies<T> {
   page: Page;
   options: ScrapeOptions;
 }
 
-export default abstract class AbstractScraperService {
+export default abstract class AbstractScraperService<T> {
+  protected abstract url: string;
+  protected abstract elementTag: string;
   protected page: Page;
   protected options: ScrapeOptions;
 
-  constructor({ page, options }: IScraperServiceDependencies) {
+  constructor({ page, options }: IScraperServiceDependencies<T>) {
     this.options = options;
     this.page = page;
   }
 
-  abstract executeScrape(): Promise<any>;
+  protected abstract createScraperDependencies(): {
+    jobSearcher: IJobSearcher;
+    dataCollector: IDataCollector<T>;
+  };
 
-  protected abstract createScraperDependencies(): any;
-
-  async scrape(): Promise<any> {
+  async scrape(): Promise<T[]> {
     try {
       return await this.executeScrape();
     } catch (err) {
@@ -31,5 +38,12 @@ export default abstract class AbstractScraperService {
         context: { error: err },
       });
     }
+  }
+  private async executeScrape(): Promise<T[]> {
+    const { jobSearcher, dataCollector } = this.createScraperDependencies();
+    await jobSearcher.searchJobOffers();
+    const collectedData = await dataCollector.scrollAndCollectData();
+
+    return collectedData;
   }
 }
