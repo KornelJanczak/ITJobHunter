@@ -3,12 +3,16 @@ import puppeteer, { Page } from "puppeteer";
 import { Browser } from "puppeteer";
 import BadRequestError from "../../../errors/badRequestError";
 import NoFluffJobsScraperService from "./scrapeNoFluffJobs";
+import JustJoinITScraperService from "./scrapeJustJoinIT";
 
 interface IMultiScraperService {
   executeScrapers(options: ScrapeOptions): Promise<any>;
 }
 
-type scraperServiceDependencies = { page: Page; options: ScrapeOptions };
+type scraperServiceDependencies = {
+  page: Page;
+  options: ScrapeOptions;
+};
 
 class MultiSiteScraperService implements IMultiScraperService {
   private browser: Browser | null = null;
@@ -31,10 +35,13 @@ class MultiSiteScraperService implements IMultiScraperService {
     const page = await this.browser.newPage();
     const scraperProps = { page, options: this.options };
 
-    const [noFluffJobsScraper] = this.createScraperServices(scraperProps);
-    await noFluffJobsScraper.scrape();
+    const [noFluffJobsScraper, justJoinItScraper] =
+      this.createScraperServices(scraperProps);
 
-    await this.waitFor(200);
+    await noFluffJobsScraper.scrape();
+    await justJoinItScraper.scrape();
+
+    await this.waitFor(500);
     await this.closeBrowser();
   }
 
@@ -44,8 +51,11 @@ class MultiSiteScraperService implements IMultiScraperService {
     const noFluffJobsScraper = new NoFluffJobsScraperService(
       scraperServiceDependencies
     );
-    // const justJoinItScraper = new JustJoinItScraperService();
-    return [noFluffJobsScraper];
+
+    const justJoinItScraper = new JustJoinITScraperService(
+      scraperServiceDependencies
+    );
+    return [noFluffJobsScraper, justJoinItScraper];
   }
 
   private async initBrowser() {
