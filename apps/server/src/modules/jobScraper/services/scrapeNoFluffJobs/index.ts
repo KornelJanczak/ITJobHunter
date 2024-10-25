@@ -4,24 +4,17 @@ import AbstractScraperService from "../abstract/abstractScraperService";
 import DataCollector from "./dataCollector";
 
 class NoFluffJobsScraperService
-  extends AbstractScraperService
+  extends AbstractScraperService<JobOffer>
   implements IJobScraperService<JobOffer>
 {
-  private url: string = "https://nofluffjobs.com/pl/";
-
-  async executeScrape(): Promise<JobOffer[]> {
-    const { jobSearcher, dataCollector } = this.createScraperDependencies();
-    await jobSearcher.searchJobOffers();
-    const collectedData = await dataCollector.scrollAndCollectData();
-
-    return collectedData;
-  }
+  protected url: string = "https://nofluffjobs.com/pl/";
+  protected elementTag: string = ".MuiBox-root.css-ai36e1";
 
   protected createScraperDependencies() {
     const jobSearcher = new JobSearcher(this.page, this.options);
     const dataCollector = new DataCollector(
       this.page,
-      ".posting-list-item",
+      this.elementTag,
       this.url
     );
 
