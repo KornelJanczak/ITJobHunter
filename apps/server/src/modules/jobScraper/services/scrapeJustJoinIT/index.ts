@@ -4,25 +4,18 @@ import { IJobScraperService } from "../../interfaces";
 import AbstractScraperService from "../abstract/abstractScraperService";
 import { JobOffer } from "../../interfaces";
 
-class ScrapeJustJoinITService
-  extends AbstractScraperService
+class JustJoinITScraperService
+  extends AbstractScraperService<JobOffer>
   implements IJobScraperService<JobOffer>
 {
-  private url: string = "https://justjoin.it/";
-
-  async executeScrape(): Promise<JobOffer[]> {
-    const { jobSearcher, dataCollector } = this.createScraperDependencies();
-    await jobSearcher.searchJobOffers();
-    const collectedData = await dataCollector.scrollAndCollectData();
-
-    return collectedData;
-  }
+  protected url: string = "https://justjoin.it/";
+  protected elementTag: string = ".posting-list-item";
 
   protected createScraperDependencies() {
     const jobSearcher = new JobSearcher(this.page, this.options);
     const dataCollector = new DataCollector(
       this.page,
-      ".posting-list-item",
+      this.elementTag,
       this.url
     );
 
@@ -30,4 +23,4 @@ class ScrapeJustJoinITService
   }
 }
 
-export default ScrapeJustJoinITService;
+export default JustJoinITScraperService;
