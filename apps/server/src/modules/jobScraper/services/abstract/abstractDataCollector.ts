@@ -65,6 +65,8 @@ export abstract class AbstractDataCollector<T> {
       }
     }
 
+    console.log(jobOffers);
+
     return this.mapData(jobOffers);
   }
 
