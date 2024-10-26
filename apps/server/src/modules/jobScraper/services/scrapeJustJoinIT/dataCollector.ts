@@ -15,6 +15,8 @@ class DataCollector
       element.$eval("a", (el) => el.getAttribute("href") || ""),
     ]);
 
+    console.log("title", title);
+
     return { title, location, url: `https://justjoin.it${url}` };
   }
 

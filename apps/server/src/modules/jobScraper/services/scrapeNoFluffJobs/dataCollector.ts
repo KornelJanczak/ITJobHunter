@@ -25,10 +25,10 @@ class DataCollector
       ),
       (await (await element.getProperty("href")).jsonValue()) as string,
     ]);
+    console.log("title", title);
 
     return { title, location, url };
   }
 }
 
 export default DataCollector;
-
