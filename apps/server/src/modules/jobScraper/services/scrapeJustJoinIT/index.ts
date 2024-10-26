@@ -9,8 +9,8 @@ class JustJoinITScraperService
   implements IJobScraperService<JobOffer>
 {
   protected url: string = "https://justjoin.it/";
-  protected elementTag: string = ".posting-list-item";
-
+  protected elementTag: string = ".MuiBox-root.css-ai36e1";
+ 
   protected createScraperDependencies() {
     const jobSearcher = new JobSearcher(this.page, this.options);
     const dataCollector = new DataCollector(

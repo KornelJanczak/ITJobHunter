@@ -8,7 +8,7 @@ class NoFluffJobsScraperService
   implements IJobScraperService<JobOffer>
 {
   protected url: string = "https://nofluffjobs.com/pl/";
-  protected elementTag: string = ".MuiBox-root.css-ai36e1";
+  protected elementTag: string = ".posting-list-item";
 
   protected createScraperDependencies() {
     const jobSearcher = new JobSearcher(this.page, this.options);
