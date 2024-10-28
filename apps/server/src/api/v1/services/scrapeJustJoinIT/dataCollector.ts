@@ -20,11 +20,7 @@ class DataCollector
     return { title, location, url: `https://justjoin.it${url}` };
   }
 
-  mapData(jobOffers: JobOffer[]): JobOffer[] {
-    return jobOffers.map((job) => {
-      return { ...job, url: `${this.pageUrl}${job.url}` };
-    });
-  }
+
 }
 
 export default DataCollector;
