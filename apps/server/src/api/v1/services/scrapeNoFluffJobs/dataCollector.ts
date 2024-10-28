@@ -1,4 +1,7 @@
-import { type JobOffer, type IDataCollector } from "../../jobScraper.interfaces";
+import {
+  type JobOffer,
+  type IDataCollector,
+} from "../../jobScraper.interfaces";
 import { type ElementHandle } from "puppeteer";
 import { AbstractDataCollector } from "../abstract/abstractDataCollector";
 
@@ -6,11 +9,6 @@ class DataCollector
   extends AbstractDataCollector<JobOffer>
   implements IDataCollector<JobOffer>
 {
-  protected mapData(jobOffers: JobOffer[]): JobOffer[] {
-    return jobOffers.map(
-      (job) => (job = { ...job, url: `${this.pageUrl}${job.url}` })
-    );
-  }
   protected async extractDataFromElement(
     element: ElementHandle<Element>
   ): Promise<JobOffer> {
