@@ -15,8 +15,6 @@ export abstract class AbstractDataCollector<T> {
     element: ElementHandle<Element>
   ): Promise<T>;
 
-  protected abstract mapData(data: T[]): T[];
-
   async scrollAndCollectData(): Promise<T[]> {
     const allJobs = new Set<T>();
     let previousHeight = 0;
@@ -65,9 +63,7 @@ export abstract class AbstractDataCollector<T> {
       }
     }
 
-    console.log(jobOffers);
-
-    return this.mapData(jobOffers);
+    return jobOffers;
   }
 
   private async autoScroll(page: Page): Promise<void> {
