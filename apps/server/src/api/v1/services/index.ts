@@ -36,7 +36,15 @@ class MultiSiteScraperService implements IMultiScraperService {
         code: 400,
       });
 
-    const page = await this.browser.newPage();
+    const page = await this.initPage(this.browser);
+
+    if (!page)
+      throw new BadRequestError({
+        message: "Page is not initialized",
+        logging: true,
+        code: 400,
+      });
+
     const scrapedData = await this.getJobOffers(page);
 
     await this.waitFor(500);
@@ -67,6 +75,26 @@ class MultiSiteScraperService implements IMultiScraperService {
       scraperServiceDependencies
     );
     return [noFluffJobsScraper, justJoinItScraper];
+  }
+
+  private async initPage(browser: Browser): Promise<Page | undefined> {
+    try {
+      const page = await browser.newPage();
+      // await page.setRequestInterception(true);
+
+      // page.on("request", (request) => {
+      //   if (
+      //     ["image", "stylesheet", "font"].indexOf(request.resourceType()) !== -1
+      //   ) {
+      //     request.abort();
+      //   } else {
+      //     request.continue();
+      //   }
+      // });
+      return page;
+    } catch (err) {
+      this.options.next(err);
+    }
   }
 
   private async initBrowser() {
