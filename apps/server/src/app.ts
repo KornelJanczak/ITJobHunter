@@ -1,11 +1,11 @@
 import express, { type Application } from "express";
 import cookieSession from "cookie-session";
 import cookieParser from "cookie-parser";
-import { generateSessionKey } from "./utils/helpers";
+import { generateSessionKey } from "./common/utils/helpers";
 import passport from "passport";
 import session from "express-session";
-import { SESSION_EXPIRY_DATE, SESSION_SECRET } from "./config";
-import { errorHandler } from "./middlewares/errorHandler";
+import { SESSION_EXPIRY_DATE, SESSION_SECRET } from "./common/config";
+import { errorHandler } from "./common/middlewares/errorHandler";
 import router from "./router";
 
 export default function createApp(): Application {
@@ -39,7 +39,7 @@ export default function createApp(): Application {
 
   app.use(passport.initialize());
   app.use(passport.session());
-  app.use("/api", router());
+  app.use("/api", router);
 
   app.use(errorHandler);
 

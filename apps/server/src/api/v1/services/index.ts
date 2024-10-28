@@ -1,7 +1,11 @@
-import { IJobScraperService, JobOffer, ScrapeOptions } from "../interfaces";
+import {
+  IJobScraperService,
+  JobOffer,
+  ScrapeOptions,
+} from "../jobScraper.interfaces";
 import puppeteer, { Page } from "puppeteer";
 import { Browser } from "puppeteer";
-import BadRequestError from "../../../errors/badRequestError";
+import BadRequestError from "../../../common/errors/badRequestError";
 import NoFluffJobsScraperService from "./scrapeNoFluffJobs";
 import JustJoinITScraperService from "./scrapeJustJoinIT";
 
@@ -33,16 +37,23 @@ class MultiSiteScraperService implements IMultiScraperService {
       });
 
     const page = await this.browser.newPage();
-    const scraperProps = { page, options: this.options };
-
-    const [noFluffJobsScraper, justJoinItScraper] =
-      this.createScraperServices(scraperProps);
-
-    await noFluffJobsScraper.scrape();
-    await justJoinItScraper.scrape();
+    const scrapedData = await this.getJobOffers(page);
 
     await this.waitFor(500);
     await this.closeBrowser();
+
+    return scrapedData;
+  }
+
+  private async getJobOffers(page: Page): Promise<JobOffer[]> {
+    const scraperProps = { page, options: this.options };
+    const [noFluffJobsScraper, justJoinItScraper] =
+      this.createScraperServices(scraperProps);
+
+    const noFluffJobJobsOffers = await noFluffJobsScraper.scrape();
+    const justJoinItJobOffers = await justJoinItScraper.scrape();
+
+    return [...noFluffJobJobsOffers, ...justJoinItJobOffers];
   }
 
   private createScraperServices(

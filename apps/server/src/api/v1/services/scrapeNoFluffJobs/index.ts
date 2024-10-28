@@ -1,4 +1,4 @@
-import { IJobScraperService, JobOffer } from "../../interfaces";
+import { IJobScraperService, JobOffer } from "../../jobScraper.interfaces";
 import JobSearcher from "./jobSearcher";
 import AbstractScraperService from "../abstract/abstractScraperService";
 import DataCollector from "./dataCollector";

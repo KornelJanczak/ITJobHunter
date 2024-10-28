@@ -1,8 +1,8 @@
 import JobSearcher from "./jobSearcher";
 import DataCollector from "./dataCollector";
-import { IJobScraperService } from "../../interfaces";
+import { IJobScraperService } from "../../jobScraper.interfaces";
 import AbstractScraperService from "../abstract/abstractScraperService";
-import { JobOffer } from "../../interfaces";
+import { JobOffer } from "../../jobScraper.interfaces";
 
 class JustJoinITScraperService
   extends AbstractScraperService<JobOffer>

@@ -1,4 +1,4 @@
-import { type JobOffer, type IDataCollector } from "../../interfaces";
+import { type JobOffer, type IDataCollector } from "../../jobScraper.interfaces";
 import { type ElementHandle } from "puppeteer";
 import { AbstractDataCollector } from "../abstract/abstractDataCollector";
 

@@ -1,5 +1,5 @@
 import { type Page, type ElementHandle } from "puppeteer";
-import BadRequestError from "../../../../errors/badRequestError";
+import BadRequestError from "../../../../common/errors/badRequestError";
 
 export abstract class AbstractDataCollector<T> {
   protected page: Page;

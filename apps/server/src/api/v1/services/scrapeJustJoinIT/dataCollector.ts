@@ -1,5 +1,5 @@
 import { ElementHandle } from "puppeteer";
-import { IDataCollector, JobOffer } from "../../interfaces";
+import { IDataCollector, JobOffer } from "../../jobScraper.interfaces";
 import { AbstractDataCollector } from "../abstract/abstractDataCollector";
 
 class DataCollector

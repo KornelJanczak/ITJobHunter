@@ -3,8 +3,8 @@ import {
   type ScrapeOptions,
   IDataCollector,
   IJobSearcher,
-} from "../../interfaces";
-import BadRequestError from "../../../../errors/badRequestError";
+} from "../../jobScraper.interfaces";
+import BadRequestError from "../../../../common/errors/badRequestError";
 
 interface IScraperServiceDependencies<T> {
   page: Page;

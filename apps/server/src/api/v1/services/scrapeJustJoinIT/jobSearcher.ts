@@ -1,4 +1,4 @@
-import { type IJobSearcher } from "../../interfaces";
+import { type IJobSearcher } from "../../jobScraper.interfaces";
 import { AbstractJobSearcher } from "../abstract/abstractJobSearcher";
 
 class JobSearcher extends AbstractJobSearcher implements IJobSearcher {

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import MultiSiteScraperService from "../services";
+import MultiSiteScraperService from "./services";
 import { JobQuery } from "@repo/interfaces/job";
 
 export const jobScraperController = async (

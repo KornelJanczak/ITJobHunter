@@ -1,9 +1,8 @@
 import { Router } from "express";
-import jobScraper from "../modules/jobScraper/routes";
+import v1Router from "../api/v1/jobScraper.router";
 
 const router = Router();
 
-export default (): Router => {
-  jobScraper(router);
-  return router;
-};
+router.use("/v1", v1Router);
+
+export default router;
