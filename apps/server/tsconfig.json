@@ -5,25 +5,30 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
-    "module": "Node16",
-    "moduleResolution": "node16",
+    "module": "NodeNext",
+    // "moduleResolution": "node16",
     "noImplicitAny": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "./",
     "removeComments": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
-    "target": "ES2022"
+
+    "target": "ES2016",
+    "types": ["jest"]
   },
 
   "include": [
     "./**/*.ts",
+    "src/**/*.ts",
+    "src/**/*.d.ts",
     "./**/*.d.ts",
     // "./cypress/**/*.ts",
     "./src/**/*.ts",
     "**/*.ts",
+    "global.d.ts",
     "."
   ],
   "exclude": ["node_modules", "dist", "build"]
