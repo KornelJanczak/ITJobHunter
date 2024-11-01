@@ -11,8 +11,8 @@ export const jobScraperController = async (
     const jobQuery: Partial<JobQuery> = req.jobQuery || {};
     const jobScraperService = new MultiSiteScraperService({ jobQuery, next });
     const jobs = await jobScraperService.executeScrapers();
-
-    return res.status(200).json({ jobOffersNumber: jobs.length, jobs });
+    const numberOfJobs = jobs.length;
+    return res.status(200).json({ numberOfJobs, jobs });
   } catch (err) {
     next(err);
   }
