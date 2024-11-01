@@ -25,7 +25,7 @@ export abstract class AbstractDataCollector<T> {
       data.forEach((job) => allJobs.add(job));
       await this.waitFor(3000);
 
-      await this.autoScroll(this.page);
+      await this.autoScroll();
 
       currentHeight = await this.page.evaluate(
         () => document.body.scrollHeight
@@ -66,24 +66,33 @@ export abstract class AbstractDataCollector<T> {
     return jobOffers;
   }
 
-  private async autoScroll(page: Page): Promise<void> {
-    await page.evaluate(async () => {
-      await new Promise<void>((resolve) => {
-        let currentScrolledHeight = 0; // value that's currently scrolled
-        const scrollingValue = 100; // 100px per scroll
+  private async autoScroll(): Promise<void> {
+    try {
+      await this.page.evaluate(async () => {
+        await new Promise<void>((resolve) => {
+          let currentScrolledHeight = 0; // value that's currently scrolled
+          const scrollingValue = 100; // 100px per scroll
 
-        const timer = setInterval(() => {
-          const scrollHeight = document.body.scrollHeight; // total height of the page;
-          window.scrollBy(0, scrollingValue);
-          currentScrolledHeight += scrollingValue; // add 100px to the current scrolled value;
+          const timer = setInterval(() => {
+            const scrollHeight = document.body.scrollHeight; // total height of the page;
+            window.scrollBy(0, scrollingValue);
+            currentScrolledHeight += scrollingValue; // add 100px to the current scrolled value;
 
-          // Repeat the process until the current scrolled value is equal to the total height of the page
-          if (currentScrolledHeight >= scrollHeight - window.innerHeight) {
-            clearInterval(timer);
-            resolve();
-          }
-        }, 50);
+            // Repeat the process until the current scrolled value is equal to the total height of the page
+            if (currentScrolledHeight >= scrollHeight - window.innerHeight) {
+              clearInterval(timer);
+              resolve();
+            }
+          }, 50);
+        });
       });
-    });
+    } catch (err) {
+      throw new BadRequestError({
+        code: 400,
+        message: "Failed to auto scroll",
+        logging: true,
+        context: { err },
+      });
+    }
   }
 }
